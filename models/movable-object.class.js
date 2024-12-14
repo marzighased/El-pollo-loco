@@ -22,9 +22,18 @@ class MovableObject {
         
           let img = new Image();
           img.src = path;
+          img.style = 'transform: scaleX(-1)';
           this.imageCache[path] = img;
 
         });
+    }
+
+    playAnimation(images) {
+        let i = this.currentImage % this.IMAGES_WALKING.length;   // let i = 0 % 6;
+        // i = 0, 1, 2, 3, 4, 5, 0, 1, 2, ...
+        let path = images[i];
+        this.img = this.imageCache[path];
+        this.currentImage++;
     }
 
     moveRight() {
