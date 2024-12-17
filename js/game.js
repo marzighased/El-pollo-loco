@@ -1,17 +1,19 @@
 let canvas;
 let world;
 let keyboard = new Keyboard();
+let gameState;
 
 
 function init() {
     canvas = document.getElementById('canvas');
-    world = new World(canvas, keyboard);
-
-    
-    console.log('My Character is', world.character);
-
-
+    gameState = new GameState();   
 }
+
+
+function startGame() {
+    gameState.startGame();
+}
+
 
 window.addEventListener("keydown", (e) => {
     console.log(e.keyCode);
@@ -41,6 +43,7 @@ window.addEventListener("keydown", (e) => {
 
     console.log(e);
 });
+
 
 
 window.addEventListener("keyup", (e) => {

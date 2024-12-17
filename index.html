@@ -5,26 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
+
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
+
+    <script src="models/game-state.class.js"></script>    
+    <script src="models/start-screen.class.js"></script>
+
     <script src="models/character.class.js"></script>
     <script src="models/chicken.class.js"></script>
     <script src="models/cloud.class.js"></script>
     <script src="models/status-bar.class.js"></script>
-    <script src="models/world.class.js"></script>
     <script src="models/background-object.class.js"></script>
     <script src="models/keyboard.class.js"></script>
-    <script src="models/level.class.js"></script>
     <script src="models/throwable-object.class.js"></script>
-    <script src="models/endboss.class.js"></script>    
+    <script src="models/endboss.class.js"></script> 
+
+    <script src="models/level.class.js"></script>
     <script src="levels/level1.js"></script>
+
+    <script src="models/world.class.js"></script>
     <script src="js/game.js"></script>
 </head>
 <body onload="init()">
     <h1>El pollo loco</h1>
 
-    <canvas id="canvas" width="720" height="480">
+    <div class="canvas-container">
+        <canvas id="canvas" width="720" height="480"></canvas>
 
-    </canvas>
+         
+        <button class="start-button" onclick="startGame()">
+            START GAME
+        </button>
+
+        
+       <div class="controls-container">
+            <div class="control-key">
+                <span class="key">←→</span>
+                <span>Move</span>
+            </div>
+            <div class="control-key">
+                <span class="key">SPACE</span>
+                <span>Jump</span>
+            </div>
+            <div class="control-key">
+                <span class="key">D</span>
+                <span>Throw Bottle</span>
+            </div>
+        </div>
+
+    </div>
+
+
+    
 </body>
 </html>
