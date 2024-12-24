@@ -3,6 +3,7 @@ class Character extends MovableObject {
     height = 280;
     y = 80;
     speed = 10;
+    bottles = 0;
 
     IMAGES_WALKING = [
         'img_pollo_locco/img/2_character_pepe/2_walk/W-21.png',

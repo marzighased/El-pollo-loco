@@ -22,14 +22,22 @@ class World {
 
 
    setWorld() {
-      this.character.world = this;
-   }
-
+    this.character.world = this;
+    console.log('Setting world for enemies');
+    this.level.enemies.forEach((enemy) => {
+        enemy.world = this;
+        if (enemy instanceof Endboss) {
+            console.log('Initializing Endboss');
+            enemy.initializeEndboss(); 
+        }
+    });
+    }
 
    run() {
       setInterval(() => {
           this.checkCollisions();
           this.checkThrowObjects();
+          this.checkBottleCollisions();  
           this.checkCollisionWithCoins(); 
       }, 200);
    }
@@ -64,6 +72,17 @@ class World {
 }
 
 
+   checkBottleCollisions() {
+    this.level.bottles.forEach((bottle, index) => {
+        if (this.character.isColliding(bottle)) {
+            this.level.bottles.splice(index, 1);
+            this.character.bottles++;
+            this.bottleBar.setBottles(this.character.bottles);
+        }
+    });
+   }
+
+
 
    draw() {
        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -80,6 +99,7 @@ class World {
        this.addObjectsToMap(this.level.enemies);
        this.addObjectsToMap(this.level.clouds);
        this.addObjectsToMap(this.level.coins);
+       this.addObjectsToMap(this.level.bottles);
        this.addObjectsToMap(this.throwableObjects);
 
        this.ctx.translate(-this.camera_x, 0);
