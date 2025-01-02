@@ -18,7 +18,7 @@ class GameState {
 
     showStartScreen() {
         this.startScreen = new StartScreen();                          // show start page
-    }
+    } 
 
     startGame() {
         this.currentState = GameState.PLAYING;                                       // start Game
@@ -39,7 +39,7 @@ class GameState {
     
         
         let youWonImage = new Image();
-        youWonImage.src = 'img_pollo_locco/img/9_intro_outro_screens/win/won_2.png';  // مسیر تصویر خودتون
+        youWonImage.src = 'img_pollo_locco/img/9_intro_outro_screens/win/won_2.png'; 
         youWonImage.onload = () => {
             ctx.drawImage(youWonImage, 0, 0, canvas.width, canvas.height);
         }

@@ -19,7 +19,7 @@ class Bottle extends MovableObject {
         this.y = 350;
         
         
-        this.offset = {
+        this.offset = { 
             x: 0,
             y: 0,
             width: 0,

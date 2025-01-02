@@ -24,7 +24,7 @@ class EndbossBar extends DrawableObject {
         this.percentage = percentage;
         let imagePath = this.IMAGES[this.resolveImageIndex()];
         this.img = this.imageCache[imagePath];
-    }
+    } 
 
     resolveImageIndex() {
         if (this.percentage == 100) {

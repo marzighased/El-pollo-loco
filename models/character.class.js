@@ -24,7 +24,7 @@ class Character extends MovableObject {
         'img_pollo_locco/img/2_character_pepe/3_jump/J-37.png',
         'img_pollo_locco/img/2_character_pepe/3_jump/J-38.png',
         'img_pollo_locco/img/2_character_pepe/3_jump/J-39.png'
-    ];
+    ]; 
 
     IMAGES_DEAD = [
         'img_pollo_locco/img/2_character_pepe/5_dead/D-51.png',

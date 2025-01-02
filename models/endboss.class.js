@@ -21,7 +21,7 @@ class Endboss extends MovableObject {
             width: 15,
             height: 90
         };
-    }
+    } 
 
     IMAGES_WALKING = [
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G1.png',

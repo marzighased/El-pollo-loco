@@ -4,14 +4,13 @@ function initLevel() {
 level1 = new Level (
     [
         new Chicken(),
-        new Chicken(),
-        new Chicken(),
+        new Chick(),    
         new Endboss()
     ],
 
     [
         new Cloud()
-    ],
+    ], 
 
     [
       new BackgroundObject('img_pollo_locco/img/5_background/layers/air.png', -719),
