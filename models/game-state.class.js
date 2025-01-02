@@ -29,6 +29,22 @@ class GameState {
         world = new World(canvas, keyboard);                                         // start Game (show main Game Page)
     }
 
+    gameWon() {
+        this.currentState = GameState.GAME_WON;
+        
+        document.querySelector('.controls-container').style.display = 'none';
+        
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+    
+        
+        let youWonImage = new Image();
+        youWonImage.src = 'img_pollo_locco/img/9_intro_outro_screens/win/won_2.png';  // مسیر تصویر خودتون
+        youWonImage.onload = () => {
+            ctx.drawImage(youWonImage, 0, 0, canvas.width, canvas.height);
+        }
+    }
+
     pauseGame() {
         this.currentState = GameState.PAUSE;                           // Pause Game
     }

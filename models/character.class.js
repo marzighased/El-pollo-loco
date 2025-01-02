@@ -43,6 +43,7 @@ class Character extends MovableObject {
     ];
 
     world;
+    keyboard;
     walking_sound = new Audio('audio/walking.mp3');
 
     constructor() {
@@ -60,6 +61,9 @@ class Character extends MovableObject {
         };
         
         this.applyGravity();
+    }
+
+    startAnimations() {
         this.animate();
     }
 

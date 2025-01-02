@@ -1,7 +1,7 @@
 class World {
 
    character = new Character();
-   level = level1;
+   level;
    canvas;
    ctx;
    keyboard;
@@ -9,37 +9,41 @@ class World {
    statusBar = new StatusBar();
    bottleBar = new BottleBar();
    coinBar = new CoinBar();
+   endbossBar = new EndbossBar();
    throwableObjects = [];
 
    constructor(canvas, keyboard) {
       this.ctx = canvas.getContext('2d');
       this.canvas = canvas;
       this.keyboard = keyboard;
-      this.draw();
+      this.level = level1;
       this.setWorld();
+      this.draw();
       this.run();
+
    }
 
 
    setWorld() {
     this.character.world = this;
-    console.log('Setting world for enemies');
+    this.character.keyboard = this.keyboard;
+    this.character.startAnimations();  
     this.level.enemies.forEach((enemy) => {
         enemy.world = this;
         if (enemy instanceof Endboss) {
-            console.log('Initializing Endboss');
-            enemy.initializeEndboss(); 
+            enemy.initializeEndboss();
         }
     });
-    }
+}
 
    run() {
       setInterval(() => {
           this.checkCollisions();
           this.checkThrowObjects();
           this.checkBottleCollisions();  
-          this.checkCollisionWithCoins(); 
-      }, 200);
+          this.checkCollisionWithCoins();
+          this.checkBottleHitsEndboss();  
+        }, 200);
    }
 
 
@@ -69,7 +73,7 @@ class World {
             this.coinBar.setCoins(this.coins.coinBar);   
         }
     });
-}
+ }
 
 
    checkBottleCollisions() {
@@ -81,6 +85,35 @@ class World {
         }
     });
    }
+
+
+   checkBottleHitsEndboss() {
+    this.throwableObjects.forEach((bottle, bottleIndex) => {
+        this.level.enemies.forEach((enemy) => {
+            if (enemy instanceof Endboss) {
+                if (bottle.isColliding(enemy)) {
+                    enemy.hit(); 
+                    this.throwableObjects.splice(bottleIndex, 1);
+                    this.endbossBar.setPercentage(enemy.energy); 
+ 
+                }
+            }
+        });
+    });
+ }
+
+
+ showYouWonScreen() {
+    
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    
+    let youWonImage = new Image();
+    youWonImage.src = 'img_pollo_locco/img/9_intro_outro_screens/win/won_2.png';
+    youWonImage.onload = () => {
+        this.ctx.drawImage(youWonImage, 0, 0, this.canvas.width, this.canvas.height);
+    }
+  }
 
 
 
@@ -107,6 +140,7 @@ class World {
        this.addToMap(this.statusBar);
        this.addToMap(this.bottleBar);
        this.addToMap(this.coinBar);
+       this.addToMap(this.endbossBar);
 
 
 

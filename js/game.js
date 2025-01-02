@@ -6,16 +6,21 @@ let keyboard = new Keyboard();
 
 function init() {
     canvas = document.getElementById('canvas');
-    //gameState = new GameState();  
-    
+    //gameState = new GameState(); 
+     
     initLevel();
     world = new World(canvas, keyboard); 
+
 }
 
 
 //function startGame() {
  //   gameState.startGame();
 //}
+
+function restartGame() {
+    location.reload(); 
+}
 
 
 

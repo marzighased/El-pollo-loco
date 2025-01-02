@@ -4,7 +4,9 @@ class Endboss extends MovableObject {
     y = 55;
     energy = 100;
     speed = 5;
-    
+    isDead = false;  
+    isDeadAnimationPlayed = false;
+
     constructor() {
         super().loadImage('img_pollo_locco/img/4_enemie_boss_chicken/2_alert/G5.png');
         this.loadImages(this.IMAGES_WALKING);
@@ -71,11 +73,43 @@ class Endboss extends MovableObject {
         }
     }
 
+
+    hit() {
+        if (this.isDead) return;
+        
+        this.energy -= 20;
+        console.log('Endboss hit! Energy:', this.energy);
+        
+        if (this.energy <= 0) {
+            this.energy = 0;
+            this.isDead = true;
+            console.log('Endboss died!');
+            
+            let currentImageIndex = 0;
+            let deathInterval = setInterval(() => {
+                if (currentImageIndex < this.IMAGES_DEAD.length) {
+                    this.loadImage(this.IMAGES_DEAD[currentImageIndex]);
+                    currentImageIndex++;
+                } else {
+                    clearInterval(deathInterval);
+                    
+                    if (this.world) {
+                        this.world.showYouWonScreen();
+                    }
+                }
+            }, 200);
+            
+        } else {
+            this.lastHit = new Date().getTime();
+        }
+    }
+
+
     animate() {
         setInterval(() => {
-            if (this.isDead()) {
-                this.playAnimation(this.IMAGES_DEAD);
-            } else if (this.isHurt()) {
+            if (this.isDead) return;  
+    
+            if (this.isHurt()) {
                 this.playAnimation(this.IMAGES_HURT);
             } else if (this.isAttacking) {
                 this.playAnimation(this.IMAGES_ATTACKING);
@@ -91,10 +125,12 @@ class Endboss extends MovableObject {
             } else {
                 this.playAnimation(this.IMAGES_WALKING);
             }
-
+    
             if (!this.isAttacking && this.isCharacterNear()) {
                 this.startAttacking();
             }
         }, 200);
     }
+    
+    
 }
