@@ -11,6 +11,9 @@ class World {
     endbossBar = new EndbossBar();
     throwableObjects = [];
     gameIntervals = [];
+    backgroundMusic = new Audio('audio/background-music.mp3');
+    gameOverSound = new Audio('audio/lost.mp3');
+    gameWinSound = new Audio('audio/won.mp3');
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -21,7 +24,14 @@ class World {
         this.draw();
         this.run();
         this.spawnNewEnemies();
+
+        this.backgroundMusic.volume = 0.1; 
+        this.backgroundMusic.loop = true; 
+        this.playBackgroundMusic();
+        this.gameOverSound.volume = 0.5; 
+        this.gameWinSound.volume = 0.5;
     }
+
 
     setWorld() {  
         this.character.world = this;
@@ -78,9 +88,10 @@ class World {
                 let characterBottom = this.character.y + this.character.height;
                 let enemyTop = enemy.y;
     
-                // برخورد از بالا با پرش - دشمن حذف میشه
+                
                 if (this.character.isAboveGround() && characterBottom >= enemyTop) {
                     if (enemy instanceof Chicken || enemy instanceof Chick) {
+                        enemy.hit();
                         const index = this.level.enemies.indexOf(enemy);
                         if (index > -1) {
                             this.level.enemies.splice(index, 1);
@@ -88,7 +99,7 @@ class World {
                         return;
                     }
                 } 
-                // برخورد از پهلو - کاراکتر آسیب میبینه
+                
                 else {
                     if (!this.character.isHurt()) {
                         if (enemy instanceof Chicken) {
@@ -162,26 +173,23 @@ class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+    
         this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.backgroundObjects);
+        this.addObjectsToMap(this.level.clouds);  
+        this.addToMap(this.character);
+        this.addObjectsToMap(this.level.enemies);
+        this.addObjectsToMap(this.level.coins);
+        this.addObjectsToMap(this.level.bottles);
+        this.addObjectsToMap(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);
-
+    
         
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.endbossBar);
-
-        this.ctx.translate(this.camera_x, 0);
-        this.addToMap(this.character);
-        this.addObjectsToMap(this.level.enemies);
-        this.addObjectsToMap(this.level.clouds);
-        this.addObjectsToMap(this.level.coins);
-        this.addObjectsToMap(this.level.bottles);
-        this.addObjectsToMap(this.throwableObjects);
-        this.ctx.translate(-this.camera_x, 0);
-
+    
         // Draw next frame
         let self = this;
         requestAnimationFrame(() => {
@@ -220,32 +228,99 @@ class World {
         this.ctx.restore();
     }
 
+    playBackgroundMusic() {
+        this.backgroundMusic.play();
+    }
+
+    
+    stopBackgroundMusic() {
+        this.backgroundMusic.pause();
+        this.backgroundMusic.currentTime = 0;
+    }
+
+    
+    toggleSound(muted) {
+        this.backgroundMusic.muted = muted;
+        this.character.walking_sound.muted = muted;
+        this.character.jumping_sound.muted = muted;
+        this.character.hurt_sound.muted = muted;
+        this.character.character_dead_sound.muted = muted;
+        this.level.enemies.forEach(enemy => {
+           if (enemy instanceof Chicken || enemy instanceof Chick) {
+            enemy.dying_sound.muted = muted;
+           }
+           if (enemy instanceof Endboss) {
+            enemy.attack_sound.muted = muted;
+            enemy.dying_sound.muted = muted;
+            }
+        });
+    
+        this.throwableObjects.forEach(obj => {
+           if (obj.throw_sound) {
+            obj.throw_sound.muted = muted;
+           }
+        });
+    }
+
     showWonScreen() {
+        this.stopBackgroundMusic();
+        this.gameWinSound.play();
         this.stopGame();
         document.getElementById('game-won').classList.remove('d-none');
     }
     
     showLostScreen() {
+        this.stopBackgroundMusic();
+        this.gameOverSound.play();
         this.stopGame();
         document.getElementById('game-over').classList.remove('d-none');
     }
     
 
     showRestartButton() {
-        let button = document.getElementById('restartButton');
-        if (button) {
-            button.style.display = 'block';
-            button.style.position = 'absolute';
-            button.style.top = '70%';
-            button.style.left = '50%';
-            button.style.transform = 'translate(-50%, -50%)';
-            button.style.zIndex = '1000';
-        }
+        document.getElementById('restartButton').classList.remove('d-none');
     }
 
     stopGame() {
     
         this.gameIntervals.forEach(interval => clearInterval(interval));
         this.gameIntervals = [];
+
+        this.level.enemies.forEach((enemy) => {
+            if (enemy instanceof Endboss) {
+                enemy.stopSounds();
+            }
+        });
+    }
+
+    stopAllSounds() {
+        this.backgroundMusic.pause();
+        this.backgroundMusic.currentTime = 0;
+        this.gameOverSound.pause();
+        this.gameOverSound.currentTime = 0;
+        this.gameWinSound.pause();
+        this.gameWinSound.currentTime = 0;
+    }
+
+
+    reset() {
+        this.stopAllSounds();  
+        this.level.enemies.forEach((enemy) => {
+        if (enemy instanceof Endboss) {
+            enemy.stopSounds();
+        }
+      });
+
+    
+    if (this.character) {
+        this.character.reset();
+        }
+     
+        this.throwableObjects = [];
+        this.camera_x = 0;
+        this.statusBar.setPercentage(100);
+        this.bottleBar.setBottles(0);
+        this.coinBar.setCoins(0);
+        this.endbossBar.setPercentage(100);
     }
 }

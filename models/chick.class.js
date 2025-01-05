@@ -1,4 +1,6 @@
 class Chick extends MovableObject {
+    dying_sound = new Audio('audio/chicken-squash.mp3');
+
     y = 370;  
     height = 50;  
     width = 50; 
@@ -28,6 +30,8 @@ class Chick extends MovableObject {
         this.x = 300 + Math.random() * 1300; 
         this.speed = 0.15 * 0.7; 
 
+        this.dying_sound.volume = 0.4;
+
         this.animate();
     }
 
@@ -48,7 +52,8 @@ class Chick extends MovableObject {
     }
 
     hit() {
-        this.energy = 0;
+        this.energy = 0;        
+        this.dying_sound.play();
         this.playAnimation(this.IMAGES_DEAD);
     }
 
@@ -56,6 +61,7 @@ class Chick extends MovableObject {
         clearInterval(this.moveLeftInterval);
         clearInterval(this.playAnimationInterval);
         this.loadImage(this.IMAGES_DEAD[0]); 
+        this.dying_sound.play();
         this.speed = 0;
     }
 }

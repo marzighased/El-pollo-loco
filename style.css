@@ -104,10 +104,30 @@ body {
     width: auto;
     height: auto;
     object-fit: contain;
-}
+ }
  
  .d-none {
     display: none !important;
+ }
+
+ 
+ .control-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+ }
+
+ #mute {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    mix-blend-mode: multiply;
+ }
+
+ #mute:hover {
+    transform: scale(1.1);
  }
  
  .controls-container {

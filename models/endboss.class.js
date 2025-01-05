@@ -1,4 +1,6 @@
 class Endboss extends MovableObject {
+    attack_sound = new Audio('audio/endboss-sound.mp3');
+    dying_sound = new Audio('audio/endboss-die.mp3');
     height = 400;
     width = 250;
     y = 55;
@@ -57,7 +59,9 @@ class Endboss extends MovableObject {
            width: 15,
            height: 90
         };
-        console.log('Endboss created at x:', this.x);
+
+        this.attack_sound.volume = 1;
+        this.dying_sound.volume = 1;
     }
 
     isAttacking = false;
@@ -74,6 +78,7 @@ class Endboss extends MovableObject {
     startAttacking() {
         if (!this.isAttacking) {
             this.isAttacking = true;
+            this.attack_sound.play();
             setTimeout(() => {
                 this.isAttacking = false;
             }, 1000);
@@ -84,13 +89,11 @@ class Endboss extends MovableObject {
         if (this.isDead) return;
         
         this.energy -= 20;
-        console.log('Endboss hit! Energy:', this.energy);
         
         if (this.energy <= 0) {
             this.energy = 0;
             this.isDead = true;
-            console.log('Endboss died!');
-            
+            this.dying_sound.play();
             let currentImageIndex = 0;
             let deathInterval = setInterval(() => {
                 if (currentImageIndex < this.IMAGES_DEAD.length) {
@@ -110,19 +113,6 @@ class Endboss extends MovableObject {
         }
     }
 
-    isCharacterNear() {
-        if (!this.world || !this.world.character) return false;
-        return Math.abs(this.world.character.x - this.x) < 500;
-    }
-    
-    startAttacking() {
-        if (!this.isAttacking) {
-            this.isAttacking = true;
-            setTimeout(() => {
-                this.isAttacking = false;
-            }, 1000);
-        }
-    }
 
     animate() {
         setInterval(() => {
@@ -149,5 +139,14 @@ class Endboss extends MovableObject {
                 this.startAttacking();
             }
         }, 200);
+    }
+
+
+    
+    stopSounds() {
+       this.attack_sound.pause();
+       this.attack_sound.currentTime = 0;
+       this.dying_sound.pause();
+       this.dying_sound.currentTime = 0;
     }
 }

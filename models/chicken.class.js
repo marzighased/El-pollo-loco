@@ -1,4 +1,5 @@
 class Chicken extends MovableObject {
+    dying_sound = new Audio('audio/chicken-squash.mp3');
     y = 370;
     height = 60;
     width = 60;
@@ -28,6 +29,8 @@ class Chicken extends MovableObject {
         this.x = 600 + Math.random() * 1800;
         this.speed = 0.15 + Math.random() * 0.5;
 
+        this.dying_sound.volume = 0.5;
+
         this.animate();
     } 
 
@@ -49,6 +52,7 @@ class Chicken extends MovableObject {
 
     hit() {
         this.energy = 0;
+        this.dying_sound.play();
         this.playAnimation(this.IMAGES_DEAD);
     }
 
@@ -56,6 +60,7 @@ class Chicken extends MovableObject {
         clearInterval(this.moveLeftInterval);
         clearInterval(this.playAnimationInterval);
         this.loadImage(this.IMAGES_DEAD[0]); 
+        this.dying_sound.play();
         this.speed = 0;
     }
 }

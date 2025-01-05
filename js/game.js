@@ -3,12 +3,15 @@ let world;
 let keyboard = new Keyboard();
 let backgroundMusic;
 let intervalIds = [];
-let isMuted = false;
 
 function init() {
     canvas = document.getElementById('canvas');
     checkOrientation();
     showStartScreen();
+
+    if (world) {
+        world.toggleSound(isMuted);
+    }
 }
 
 function showStartScreen() {
@@ -17,21 +20,42 @@ function showStartScreen() {
     
     if (startButton) {
         startScreen.style.display = 'flex'; 
+        document.querySelector('.controls-container').style.display = 'flex';
+        startButton.style.display = 'block';
+        
         startButton.onclick = function() {
             startScreen.style.display = 'none';
+            document.querySelector('.controls-container').style.display = 'none';
             initLevel();
             world = new World(canvas, keyboard);
+            world.toggleSound(isMuted);
+
         };
     }
 }
 
 function restartGame() {
-    stopAllSounds();
     clearAllIntervals();
     
     document.getElementById('game-over').classList.add('d-none');
     document.getElementById('game-won').classList.add('d-none');
+
+    if (world) {
+        world.reset();
+        world.character.reset();
+    }
     document.getElementById('start-screen').classList.remove('d-none');
+
+    initLevel();
+    showStartScreen();
+}
+
+
+function clearAllIntervals() {
+    const highestId = window.setInterval(() => {}, 0);
+    for (let i = 0; i <= highestId; i++) {
+        window.clearInterval(i);
+    }
 }
 
 function checkOrientation() {
@@ -51,27 +75,14 @@ function checkOrientation() {
 }
 
 
-function restartGame() {
-    stopAllSounds();
-    clearAllIntervals();
-    
-    
-    document.getElementById('game-over').classList.add('d-none');
-    document.getElementById('game-won').classList.add('d-none');
-    
-    
-    document.getElementById('start-screen').classList.remove('d-none');
-}
 
 
 function showGameOver() {
-    stopAllSounds();
     document.getElementById('game-over').classList.remove('d-none');
 }
 
 
 function showGameWon() {
-    stopAllSounds();
     document.getElementById('game-won').classList.remove('d-none');
 }
 
@@ -82,26 +93,25 @@ function stopAllSounds() {
 }
 
 
-function clearAllIntervals() {
-    intervalIds.forEach(clearInterval);
-}
-
+let isMuted = false;
 
 function toggleMute() {
     isMuted = !isMuted;
     updateMuteIcon();
     
-    if (isMuted) {
-        backgroundMusic.pause();
-    } else {
-        backgroundMusic.play();
+    if (world) {
+        world.toggleSound(isMuted);
     }
 }
 
 
 function updateMuteIcon() {
     let muteIcon = document.getElementById('mute');
-    muteIcon.src = isMuted ? 'img_pollo_locco/img/7_statusbars/3_icons/mute.png' : 'img_pollo_locco/img/7_statusbars/3_icons/unmute.png';
+    if (muteIcon) {
+        muteIcon.src = isMuted ? 
+            'img_pollo_locco/img/7_statusbars/3_icons/mute.png' : 
+            'img_pollo_locco/img/7_statusbars/3_icons/unmute.png';
+    }
 }
 
 
