@@ -10,6 +10,7 @@ class World {
     coinBar = new CoinBar();
     endbossBar = new EndbossBar();
     throwableObjects = [];
+    gameIntervals = [];
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -22,7 +23,7 @@ class World {
         this.spawnNewEnemies();
     }
 
-    setWorld() {
+    setWorld() {  
         this.character.world = this;
         this.character.keyboard = this.keyboard;
         this.character.startAnimations();
@@ -35,84 +36,86 @@ class World {
     }
 
     run() {
-        setInterval(() => {
+        const interval = setInterval(() => {
             this.checkCollisions();
-            this.checkEnemySquash();
             this.checkThrowObjects();
             this.checkBottleCollisions();
             this.checkCollisionWithCoins();
             this.checkBottleHitsEndboss();
         }, 200);
+        this.gameIntervals.push(interval);
     }
 
     spawnNewEnemies() {
-        setInterval(() => {
-            if (!this.character.isDead() && this.level.enemies.length < 10) {  
-                if (Math.random() < 0.2) {  
+        const interval = setInterval(() => {
+            if (!this.character.isDead() && this.level.enemies.length < 10) {
+                if (Math.random() < 0.4) {
                     let enemy;
-                    if (Math.random() < 0.4) {
+                    if (Math.random() < 0.5) {
                         enemy = new Chicken();
                     } else {
                         enemy = new Chick();
                     }
                     
-                    enemy.x = this.character.x + 1000 + Math.random() * 500; 
+                    const minDistance = 400;  
+                    const maxDistance = 800;  
+                    let spawnX = this.character.x + minDistance + Math.random() * (maxDistance - minDistance);
+                    spawnX = Math.min(spawnX, this.level.level_end_x - 500);
+                    
+                    enemy.x = spawnX;
                     enemy.world = this;
                     this.level.enemies.push(enemy);
                 }
             }
-        }, 4000);  
+        }, 2000);
+        this.gameIntervals.push(interval);
     }
 
+    
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy) && !this.character.isAboveGround()) {
-                if (enemy instanceof Chicken) {
-                    this.character.energy -= 5;
-                } else if (enemy instanceof Chick) {
-                    this.character.energy -= 2;
-                } else if (enemy instanceof Endboss) {
-                    this.character.energy -= 10;
-                }
-                
-                if (this.character.energy < 0) {
-                    this.character.energy = 0;
-                }
-                
-                this.character.lastHit = new Date().getTime();
-                this.statusBar.setPercentage(this.character.energy);
-            }
-        });
-    }
-
-    checkEnemySquash() {
-        this.level.enemies.forEach((enemy) => {
-            if ((enemy instanceof Chicken || enemy instanceof Chick) && !enemy.isSquashed) {
-                if (this.character.isAboveGround() && this.character.speedY <= 0) {  
-                    let characterBottom = this.character.y + this.character.height;
-                    let enemyTop = enemy.y;
-                    let characterCenter = this.character.x + (this.character.width / 2);
-                    let enemyLeft = enemy.x;
-                    let enemyRight = enemy.x + enemy.width;
+            if (this.character.isColliding(enemy) && !this.character.isDead()) {
+                let characterBottom = this.character.y + this.character.height;
+                let enemyTop = enemy.y;
     
-                    if (this.character.isColliding(enemy) && 
-                        characterBottom >= enemyTop && 
-                        characterBottom <= enemyTop + 60 &&   
-                        characterCenter >= enemyLeft - 20 &&  
-                        characterCenter <= enemyRight + 20) {
-                        
-                        let squashSound = new Audio('audio/squash.mp3');
-                        squashSound.play();
-                        
-                        enemy.squash();
-                        this.character.speedY = 15;
+                // برخورد از بالا با پرش - دشمن حذف میشه
+                if (this.character.isAboveGround() && characterBottom >= enemyTop) {
+                    if (enemy instanceof Chicken || enemy instanceof Chick) {
+                        const index = this.level.enemies.indexOf(enemy);
+                        if (index > -1) {
+                            this.level.enemies.splice(index, 1);
+                        }
+                        return;
+                    }
+                } 
+                // برخورد از پهلو - کاراکتر آسیب میبینه
+                else {
+                    if (!this.character.isHurt()) {
+                        if (enemy instanceof Chicken) {
+                            this.character.hit(10);
+                            this.statusBar.setPercentage(this.character.energy);
+                        } else if (enemy instanceof Chick) {
+                            this.character.hit(5);
+                            this.statusBar.setPercentage(this.character.energy);
+                        } else if (enemy instanceof Endboss && enemy.isAttacking) {
+                            this.character.hit(25);
+                            this.statusBar.setPercentage(this.character.energy);
+                        }
+    
+                        if (this.character.isDead()) {
+                            this.character.playDeathAnimation();
+                            setTimeout(() => {
+                                this.stopGame();
+                                document.getElementById('game-over').classList.remove('d-none');
+                            }, 1000);
+                        }
                     }
                 }
             }
         });
-        
-        this.level.enemies = this.level.enemies.filter(enemy => !enemy.remove);
     }
+
+    
 
     checkThrowObjects() {
         if (this.keyboard.D && this.character.bottles > 0) {
@@ -157,15 +160,6 @@ class World {
         });
     }
 
-    showYouWonScreen() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        let youWonImage = new Image();
-        youWonImage.src = 'img_pollo_locco/img/9_intro_outro_screens/win/won_2.png';
-        youWonImage.onload = () => {
-            this.ctx.drawImage(youWonImage, 0, 0, this.canvas.width, this.canvas.height);
-        }
-    }
-
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -173,7 +167,7 @@ class World {
         this.addObjectsToMap(this.level.backgroundObjects);
         this.ctx.translate(-this.camera_x, 0);
 
-    
+        
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
@@ -188,8 +182,10 @@ class World {
         this.addObjectsToMap(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);
 
+        // Draw next frame
+        let self = this;
         requestAnimationFrame(() => {
-            this.draw();
+            self.draw();
         });
     }
 
@@ -222,5 +218,34 @@ class World {
     flipImageBack(mo) {
         mo.x = mo.x * -1;
         this.ctx.restore();
+    }
+
+    showWonScreen() {
+        this.stopGame();
+        document.getElementById('game-won').classList.remove('d-none');
+    }
+    
+    showLostScreen() {
+        this.stopGame();
+        document.getElementById('game-over').classList.remove('d-none');
+    }
+    
+
+    showRestartButton() {
+        let button = document.getElementById('restartButton');
+        if (button) {
+            button.style.display = 'block';
+            button.style.position = 'absolute';
+            button.style.top = '70%';
+            button.style.left = '50%';
+            button.style.transform = 'translate(-50%, -50%)';
+            button.style.zIndex = '1000';
+        }
+    }
+
+    stopGame() {
+    
+        this.gameIntervals.forEach(interval => clearInterval(interval));
+        this.gameIntervals = [];
     }
 }

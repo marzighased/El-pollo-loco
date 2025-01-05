@@ -3,35 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>El Pollo Loco</title>
     <link rel="stylesheet" href="style.css">
-
-    <script src="models/drawable-object.class.js"></script>
-    <script src="models/movable-object.class.js"></script>
- 
-    <script src="models/game-state.class.js"></script>
-    <script src="models/start-screen.class.js"></script>
-
-    <script src="models/bottle.class.js"></script>
-    <script src="models/character.class.js"></script>
-    <script src="models/chicken.class.js"></script>
-    <script src="models/chick.class.js"></script>
-    <script src="models/cloud.class.js"></script>
-    <script src="models/status-bar.class.js"></script>
-    <script src="models/coin.class.js"></script>
-    <script src="models/bottle-bar.class.js"></script>
-    <script src="models/coin-bar.class.js"></script>
-    <script src="models/endboss-bar.class.js"></script>
-    <script src="models/background-object.class.js"></script>
-    <script src="models/keyboard.class.js"></script>
-    <script src="models/throwable-object.class.js"></script>
-    <script src="models/endboss.class.js"></script> 
-
-    <script src="models/level.class.js"></script>
-    <script src="levels/level1.js"></script>
-
-    <script src="models/world.class.js"></script> 
-    <script src="js/game.js"></script>
 </head>
 <body onload="init()">
     <h1>El pollo loco</h1>
@@ -39,13 +12,13 @@
     <div class="canvas-container">
         <canvas id="canvas" width="720" height="480"></canvas>
 
-        <!--
-        <button class="start-button" onclick="startGame()">
-            START GAME
-        </button>
-
-
-       <div class="controls-container">
+        
+        <div id="start-screen" class="start-screen">
+           <img src="img_pollo_locco/img/9_intro_outro_screens/start/startscreen_1.png" alt="Startscreen">
+           <button id="start-button" class="start-button">START GAME</button>
+        
+    
+         <div class="controls-container">
             <div class="control-key">
                 <span class="key">←→</span>
                 <span>Move</span>
@@ -58,16 +31,56 @@
                 <span class="key">D</span>
                 <span>Throw Bottle</span>
             </div>
-        </div> 
-                -->
-
-                <button id="restartButton" style="display: none;" onclick="restartGame()">
-                    RESTART GAME
-                </button>
-
+         </div>   
+        </div>
+        
+        <button id="restartButton" style="display: none;" onclick="restartGame()">
+            RESTART GAME
+        </button>
     </div>
 
+    
+    <div id="game-over" class="game-screen d-none">
+        <img src="img_pollo_locco/img/9_intro_outro_screens/game_over/oh no you lost!.png">
+        <button onclick="restartGame()" class="restart-btn">Restart Game</button>
+    </div>
 
     
+    <div id="game-won" class="game-screen d-none">
+        <img src="img_pollo_locco/img/9_intro_outro_screens/win/won_2.png">
+        <button onclick="restartGame()" class="restart-btn">Play Again</button>
+    </div>
+
+    
+    <div id="orientation-hint">
+        Please rotate your device!
+    </div>
+
+    
+    <script src="models/drawable-object.class.js"></script>
+    <script src="models/movable-object.class.js"></script>
+
+    <script src="models/game-state.class.js"></script>
+    <script src="models/start-screen.class.js"></script>
+    
+    <script src="models/character.class.js"></script>
+    <script src="models/chicken.class.js"></script>
+    <script src="models/chick.class.js"></script>
+    <script src="models/cloud.class.js"></script>
+    <script src="models/status-bar.class.js"></script>
+    <script src="models/coin-bar.class.js"></script>
+    <script src="models/bottle-bar.class.js"></script>
+    <script src="models/endboss-bar.class.js"></script>
+    <script src="models/background-object.class.js"></script>
+    <script src="models/keyboard.class.js"></script>
+    <script src="models/level.class.js"></script>
+    <script src="models/throwable-object.class.js"></script>
+    <script src="models/endboss.class.js"></script>
+    <script src="models/coin.class.js"></script>
+    <script src="models/bottle.class.js"></script>
+
+    <script src="levels/level1.js"></script>
+    <script src="models/world.class.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>

@@ -9,7 +9,7 @@ class GameState {
         this.init();
     }
 
-    init() {
+    init() {  
  
         if (this.currentState === GameState.START) {                   // Initial Game settings
             this.showStartScreen();

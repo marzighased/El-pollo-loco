@@ -1,16 +1,12 @@
 class Chicken extends MovableObject {
-    y = 360;
+    y = 370;
     height = 60;
     width = 60;
-    energy = 5;
-    isSquashed = false;
-
 
     IMAGES_WALKING = [
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png',
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
         'img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/3_w.png'
-
     ];
 
     IMAGES_DEAD = [
@@ -21,39 +17,45 @@ class Chicken extends MovableObject {
         super().loadImage('./img_pollo_locco/img/3_enemies_chicken/chicken_normal/1_walk/1_w.png');
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_DEAD);
-        
-        this.offset = {
-            x: 0,    
-            y: 0,    
-            width: 0, 
-            height: 0 
+         
+        this.offset = { 
+            x: 5,
+            y: 5,
+            width: 10,
+            height: 10
         };
 
-        this.x = 200 + Math.random() * 500;
+        this.x = 600 + Math.random() * 1800;
         this.speed = 0.15 + Math.random() * 0.5;
 
         this.animate();
     } 
 
-    squash() {
-        this.isSquashed = true;
-        this.speed = 0; 
+    animate() {
+        setInterval(() => {
+            if (this.energy > 0) {
+                this.moveLeft();
+            }
+        }, 1000 / 60); 
+    
+        setInterval(() => {
+            if (this.energy > 0) {
+                this.playAnimation(this.IMAGES_WALKING); 
+            } else {
+                this.playAnimation(this.IMAGES_DEAD);
+            }
+        }, 400);
+    }
+
+    hit() {
+        this.energy = 0;
         this.playAnimation(this.IMAGES_DEAD);
-        
-        setTimeout(() => {
-            this.remove = true; 
-        }, 500);
     }
 
-  animate() {
-
-      setInterval(() => {
-          this.moveLeft();
-      }, 1000 / 60);
-
-      setInterval(() => {
-          this.playAnimation(this.IMAGES_WALKING);
-      }, 200);
+    die() {
+        clearInterval(this.moveLeftInterval);
+        clearInterval(this.playAnimationInterval);
+        this.loadImage(this.IMAGES_DEAD[0]); 
+        this.speed = 0;
     }
-
-}  
+}

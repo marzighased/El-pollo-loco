@@ -7,23 +7,7 @@ class Endboss extends MovableObject {
     isDead = false;  
     isDeadAnimationPlayed = false;
 
-    constructor() {
-        super().loadImage('img_pollo_locco/img/4_enemie_boss_chicken/2_alert/G5.png');
-        this.loadImages(this.IMAGES_WALKING);
-        this.loadImages(this.IMAGES_ATTACKING);
-        this.loadImages(this.IMAGES_HURT);
-        this.loadImages(this.IMAGES_DEAD);
-
-        this.x = 2500;
-        this.offset = {
-            x: 10,
-            y: 70,
-            width: 15,
-            height: 90
-        };
-    } 
-
-    IMAGES_WALKING = [
+    IMAGES_WALKING = [  
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G1.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G2.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G3.png',
@@ -53,6 +37,29 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
 
+    constructor() {
+        super().loadImage('img_pollo_locco/img/4_enemie_boss_chicken/2_alert/G5.png');
+        this.loadImages(this.IMAGES_WALKING);
+        this.loadImages(this.IMAGES_ATTACKING);
+        this.loadImages(this.IMAGES_HURT);
+        this.loadImages(this.IMAGES_DEAD);
+
+        this.x = 2500;
+        this.y = 55;
+        this.height = 400;
+        this.width = 250;
+        this.speed = 5;
+        this.energy = 100;
+
+        this.offset = {
+           x: 10,
+           y: 70,
+           width: 15,
+           height: 90
+        };
+        console.log('Endboss created at x:', this.x);
+    }
+
     isAttacking = false;
 
     initializeEndboss() {
@@ -73,7 +80,6 @@ class Endboss extends MovableObject {
         }
     }
 
-
     hit() {
         if (this.isDead) return;
         
@@ -92,18 +98,31 @@ class Endboss extends MovableObject {
                     currentImageIndex++;
                 } else {
                     clearInterval(deathInterval);
-                    
                     if (this.world) {
-                        this.world.showYouWonScreen();
+                        setTimeout(() => {
+                            this.world.showWonScreen();
+                        }, 1000);
                     }
                 }
             }, 200);
-            
         } else {
             this.lastHit = new Date().getTime();
         }
     }
 
+    isCharacterNear() {
+        if (!this.world || !this.world.character) return false;
+        return Math.abs(this.world.character.x - this.x) < 500;
+    }
+    
+    startAttacking() {
+        if (!this.isAttacking) {
+            this.isAttacking = true;
+            setTimeout(() => {
+                this.isAttacking = false;
+            }, 1000);
+        }
+    }
 
     animate() {
         setInterval(() => {
@@ -131,6 +150,4 @@ class Endboss extends MovableObject {
             }
         }, 200);
     }
-    
-    
 }
