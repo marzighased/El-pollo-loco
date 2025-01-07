@@ -20,8 +20,9 @@
         <div id="start-screen" class="overlay-screen">
            <img src="img_pollo_locco/img/9_intro_outro_screens/start/startscreen_1.png" alt="Startscreen">
            <button id="start-button" class="game-btn">START GAME</button>
-        
-    
+           <button onclick="showImpressum()" class="game-btn impressum-btn">IMPRESSUM</button>
+
+
          <div class="controls-container">
             <div class="control-key">
                 <span class="key">←→</span>
@@ -59,6 +60,19 @@
     <div id="orientation-hint">
         Please rotate your device!
     </div>
+
+    <div id="impressum" class="impressum-container d-none">
+        <div class="impressum-content">
+            <h2>Impressum</h2>
+            <p>Marzieh Ghasedian</p>
+            <p>Dr.-Grosz str - 39126 Magdeburg</p>
+            <p>marzighased@gmail.com</p>
+            <p>017294413</p>
+            <button onclick="closeImpressum()" class="game-btn">Close</button>
+        </div>
+    </div>
+
+    
 
     <script src="models/audio-manager.class.js"></script>
     <script src="models/drawable-object.class.js"></script>

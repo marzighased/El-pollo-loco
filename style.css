@@ -137,6 +137,7 @@ canvas {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 20px;
 }
 
 .key {
@@ -153,6 +154,34 @@ canvas {
     top: 20px;
     right: 20px;
     z-index: 102;
+    padding: 2px;
+}
+
+.impressum-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.impressum-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+}
+
+.impressum-btn {
+    bottom: 15% !important; 
+    background-color: #ffd54f !important; 
+    font-size: 18px !important; 
 }
 
 #mute {
@@ -160,10 +189,12 @@ canvas {
     height: 40px;
     cursor: pointer;
     transition: transform 0.2s;
+    background: none;
 }
 
 #mute:hover {
     transform: scale(1.1);
+    filter: brightness(1.2);
 }
 
 
@@ -261,6 +292,7 @@ canvas {
         padding: 10px;
         border-radius: 10px;
         margin: 0;
+        z-index: 105;
     }
 
     .control-key {
@@ -275,7 +307,15 @@ canvas {
         transform: translateY(-50%);
     }
 
-    
+    .impressum-btn {
+        bottom: auto !important; 
+        font-size: 16px !important;
+        padding: 8px 16px !important;
+        top: 62% !important; 
+        transform: translateY(-50%) !important; 
+        z-index: 106; 
+    }
+
     .control-buttons {
         top: 10px;
         right: 10px;

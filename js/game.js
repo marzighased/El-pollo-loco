@@ -171,6 +171,14 @@ function updateMuteIcon() {
     }
 }
 
+function showImpressum() {
+    document.getElementById('impressum').classList.remove('d-none');
+}
+
+function closeImpressum() {
+    document.getElementById('impressum').classList.add('d-none');
+}
+
 
 function fullscreen() {
     let fullscreenElement = document.getElementById('canvas');

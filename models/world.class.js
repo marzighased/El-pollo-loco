@@ -77,47 +77,89 @@ class World {
 
     
     checkCollisions() {
-        this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy) && !this.character.isDead()) {
-                let characterBottom = this.character.y + this.character.height;
-                let enemyTop = enemy.y;
+        const interval = setInterval(() => {
+            if (!this.character) return; 
     
-                
-                if (this.character.isAboveGround() && characterBottom >= enemyTop) {
-                    if (enemy instanceof Chicken || enemy instanceof Chick) {
-                        enemy.hit();
-                        const index = this.level.enemies.indexOf(enemy);
-                        if (index > -1) {
-                            this.level.enemies.splice(index, 1);
+            this.level.enemies.forEach((enemy) => {
+                if (this.character.isColliding(enemy) && !this.character.isDead()) {
+                    let characterBottom = this.character.y + this.character.height;
+                    let enemyTop = enemy.y;
+                    let characterTop = this.character.y;
+                    let characterCenter = this.character.x + this.character.width / 2;
+                    let enemyCenter = enemy.x + enemy.width / 2;
+                    
+                    if (this.character.speedY < 0 &&
+                        characterBottom >= enemyTop && 
+                        characterBottom <= enemyTop + 50 &&
+                        Math.abs(characterCenter - enemyCenter) < 50) { 
+                        
+                        if (enemy instanceof Chicken || enemy instanceof Chick) {
+                            enemy.hit();
+                            const index = this.level.enemies.indexOf(enemy);
+                            if (index > -1) {
+                                this.level.enemies.splice(index, 1);
+                            }
+                            
+                            this.character.speedY = 15;
+                            return;
                         }
-                        return;
-                    }
-                } 
-                
-                else {
-                    if (!this.character.isHurt()) {
-                        if (enemy instanceof Chicken) {
-                            this.character.hit(10);
-                            this.statusBar.setPercentage(this.character.energy);
-                        } else if (enemy instanceof Chick) {
-                            this.character.hit(5);
-                            this.statusBar.setPercentage(this.character.energy);
-                        } else if (enemy instanceof Endboss && enemy.isAttacking) {
-                            this.character.hit(25);
-                            this.statusBar.setPercentage(this.character.energy);
-                        }
+                    } 
+                    
+                    else {
+                        if (!this.character.isHurt()) {
+                            if (enemy instanceof Chicken) {
+                                this.character.hit(10);
+                                this.statusBar.setPercentage(this.character.energy);
+                                
+                                if (characterCenter < enemyCenter) {
+                                    this.character.x -= 50;
+                                } else {
+                                    this.character.x += 50;
+                                }
     
-                        if (this.character.isDead()) {
-                            this.character.playDeathAnimation();
-                            setTimeout(() => {
-                                this.stopGame();
-                                document.getElementById('game-over').classList.remove('d-none');
-                            }, 1000);
+                            } else if (enemy instanceof Chick) {
+                                this.character.hit(5);
+                                this.statusBar.setPercentage(this.character.energy);
+                            
+                                if (characterCenter < enemyCenter) {
+                                    this.character.x -= 30;
+                                } else {
+                                    this.character.x += 30;
+                                }
+    
+                            } else if (enemy instanceof Endboss && enemy.isAttacking) {
+                                this.character.hit(25);
+                                this.statusBar.setPercentage(this.character.energy);
+                                
+                                if (characterCenter < enemyCenter) {
+                                    this.character.x -= 100;
+                                } else {
+                                    this.character.x += 100;
+                                }
+                            }
+    
+                            if (this.character.isDead()) {
+                                this.character.playDeathAnimation();
+                                setTimeout(() => {
+                                    this.stopGame();
+                                    document.getElementById('game-over').classList.remove('d-none');
+                                }, 1000);
+                            }
                         }
                     }
                 }
+            });
+    
+            if (this.character.x < -100) {
+                this.character.x = -100;
             }
-        });
+            if (this.character.x > 2200) {
+                this.character.x = 2200;
+            }
+    
+        }, 50);
+        
+        this.gameIntervals.push(interval);
     }
 
     

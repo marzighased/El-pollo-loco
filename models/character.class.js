@@ -193,7 +193,13 @@ class Character extends MovableObject {
 
     animate() {
         setInterval(() => {
-            if (!this.isDead()) {  
+            if (!this.isDead()) { 
+                
+                if (this.world.keyboard.SPACE) {
+                    this.jump();
+                    this.resetTimers();
+                }
+
                 if (this.world.keyboard.RIGHT && this.x < 2200) {
                     this.moveRight();
                     this.otherDirection = false;
@@ -272,9 +278,9 @@ class Character extends MovableObject {
                 if (!this.longIdleTimer) {
                     this.longIdleTimer = setTimeout(() => {
                         this.playAnimation(this.IMAGES_LONGIDLE);
-                    }, 4000);
+                    }, 3000);
                 }
-            }, 3000);
+            }, 1500);
         }
     }
 
