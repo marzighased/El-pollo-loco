@@ -6,12 +6,6 @@ class Character extends MovableObject {
     coins = 0;
 
 
-    walking_sound = new Audio('audio/walking.mp3');
-    jumping_sound = new Audio('audio/jumping.mp3');
-    hurt_sound = new Audio('audio/hurt.mp3');
-    character_dead_sound = new Audio('audio/character-die.mp3');
-
-
     IMAGES_WALKING = [
         'img_pollo_locco/img/2_character_pepe/2_walk/W-21.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-22.png',
@@ -99,11 +93,6 @@ class Character extends MovableObject {
             width: 40,
             height: 110
         };
-
-        this.walking_sound.volume = 0.5;
-        this.jumping_sound.volume = 0.5;
-        this.hurt_sound.volume = 0.5;
-        this.character_dead_sound.volume = 0.4;
         
         this.applyGravity();
     }
@@ -119,7 +108,7 @@ class Character extends MovableObject {
     jump() {
         if (!this.isAboveGround()) {
             this.speedY = 25; 
-            this.jumping_sound.play();
+            window.audioManager.play('jumping');
         }
     }
 
@@ -141,9 +130,9 @@ class Character extends MovableObject {
             this.lastHit = new Date().getTime();
 
             if (this.energy <= 0) {
-                this.character_dead_sound.play();
+                window.audioManager.play('characterDead');
             } else {
-                this.hurt_sound.play();
+                window.audioManager.play('hurt');
             }
             
             
@@ -210,7 +199,7 @@ class Character extends MovableObject {
                     this.otherDirection = false;
                     this.resetTimers();
                     if (!this.isAboveGround()) {
-                        this.walking_sound.play();
+                        window.audioManager.play('walking');
                     }
                 }
                 
@@ -219,12 +208,12 @@ class Character extends MovableObject {
                     this.otherDirection = true;
                     this.resetTimers();
                     if (!this.isAboveGround()) {
-                        this.walking_sound.play();
+                        window.audioManager.play('walking');
                     }
                 }
      
                 if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
-                    this.walking_sound.pause();
+                    window.audioManager.stop('walking');
                     this.walking_sound.currentTime = 0;
                 }
                 
@@ -255,16 +244,6 @@ class Character extends MovableObject {
 
     reset() {
         
-        this.walking_sound.pause();
-        this.walking_sound.currentTime = 0;
-        this.jumping_sound.pause();
-        this.jumping_sound.currentTime = 0;
-        this.hurt_sound.pause();
-        this.hurt_sound.currentTime = 0;
-        this.character_dead_sound.pause();
-        this.character_dead_sound.currentTime = 0;
-
-        
         this.energy = 100;
         this.coins = 0;
         this.bottles = 0;
@@ -293,12 +272,11 @@ class Character extends MovableObject {
                 if (!this.longIdleTimer) {
                     this.longIdleTimer = setTimeout(() => {
                         this.playAnimation(this.IMAGES_LONGIDLE);
-                    }, 3000);
+                    }, 4000);
                 }
-            }, 2000);
+            }, 3000);
         }
     }
 
     
 }
-

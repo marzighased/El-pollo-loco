@@ -17,9 +17,9 @@
         </div>
 
         
-        <div id="start-screen" class="start-screen">
+        <div id="start-screen" class="overlay-screen">
            <img src="img_pollo_locco/img/9_intro_outro_screens/start/startscreen_1.png" alt="Startscreen">
-           <button id="start-button" class="start-button">START GAME</button>
+           <button id="start-button" class="game-btn">START GAME</button>
         
     
          <div class="controls-container">
@@ -44,15 +44,15 @@
     </div>
 
     
-    <div id="game-over" class="game-screen d-none">
-        <img src="img_pollo_locco/img/9_intro_outro_screens/game_over/oh no you lost!.png">
-        <button onclick="restartGame()" class="restart-btn">Restart Game</button>
+    <div id="game-over" class="overlay-screen d-none">
+        <img src="img_pollo_locco/img/9_intro_outro_screens/game_over/oh no you lost!.png" alt="Game Over">
+        <button onclick="restartGame()" class="game-btn">Restart Game</button>
     </div>
 
     
-    <div id="game-won" class="game-screen d-none">
-        <img src="img_pollo_locco/img/9_intro_outro_screens/win/won_2.png">
-        <button onclick="restartGame()" class="restart-btn">Play Again</button>
+    <div id="game-won" class="overlay-screen d-none">
+        <img src="img_pollo_locco/img/9_intro_outro_screens/win/won_1.png" alt="You Won">
+        <button onclick="restartGame()" class="game-btn">Play Again</button>
     </div>
 
     
@@ -60,7 +60,7 @@
         Please rotate your device!
     </div>
 
-    
+    <script src="models/audio-manager.class.js"></script>
     <script src="models/drawable-object.class.js"></script>
     <script src="models/movable-object.class.js"></script>
 

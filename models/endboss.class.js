@@ -1,6 +1,5 @@
 class Endboss extends MovableObject {
-    attack_sound = new Audio('audio/endboss-sound.mp3');
-    dying_sound = new Audio('audio/endboss-die.mp3');
+    
     height = 400;
     width = 250;
     y = 55;
@@ -50,7 +49,7 @@ class Endboss extends MovableObject {
         this.y = 55;
         this.height = 400;
         this.width = 250;
-        this.speed = 5;
+        this.speed = 25;
         this.energy = 100;
 
         this.offset = {
@@ -60,8 +59,6 @@ class Endboss extends MovableObject {
            height: 90
         };
 
-        this.attack_sound.volume = 1;
-        this.dying_sound.volume = 1;
     }
 
     isAttacking = false;
@@ -78,7 +75,7 @@ class Endboss extends MovableObject {
     startAttacking() {
         if (!this.isAttacking) {
             this.isAttacking = true;
-            this.attack_sound.play();
+            window.audioManager.play('endbossAttack');
             setTimeout(() => {
                 this.isAttacking = false;
             }, 1000);
@@ -93,7 +90,7 @@ class Endboss extends MovableObject {
         if (this.energy <= 0) {
             this.energy = 0;
             this.isDead = true;
-            this.dying_sound.play();
+            window.audioManager.play('endbossDie');
             let currentImageIndex = 0;
             let deathInterval = setInterval(() => {
                 if (currentImageIndex < this.IMAGES_DEAD.length) {
@@ -141,12 +138,4 @@ class Endboss extends MovableObject {
         }, 200);
     }
 
-
-    
-    stopSounds() {
-       this.attack_sound.pause();
-       this.attack_sound.currentTime = 0;
-       this.dying_sound.pause();
-       this.dying_sound.currentTime = 0;
-    }
 }

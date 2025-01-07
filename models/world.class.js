@@ -11,9 +11,7 @@ class World {
     endbossBar = new EndbossBar();
     throwableObjects = [];
     gameIntervals = [];
-    backgroundMusic = new Audio('audio/background-music.mp3');
-    gameOverSound = new Audio('audio/lost.mp3');
-    gameWinSound = new Audio('audio/won.mp3');
+    
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -24,12 +22,8 @@ class World {
         this.draw();
         this.run();
         this.spawnNewEnemies();
-
-        this.backgroundMusic.volume = 0.1; 
-        this.backgroundMusic.loop = true; 
-        this.playBackgroundMusic();
-        this.gameOverSound.volume = 0.5; 
-        this.gameWinSound.volume = 0.5;
+        window.audioManager.playLoop('background'); 
+        
     }
 
 
@@ -58,7 +52,7 @@ class World {
 
     spawnNewEnemies() {
         const interval = setInterval(() => {
-            if (!this.character.isDead() && this.level.enemies.length < 10) {
+            if (!this.character.isDead() && this.level.enemies.length < 15) {
                 if (Math.random() < 0.4) {
                     let enemy;
                     if (Math.random() < 0.5) {
@@ -77,7 +71,7 @@ class World {
                     this.level.enemies.push(enemy);
                 }
             }
-        }, 2000);
+        }, 1500);
         this.gameIntervals.push(interval);
     }
 
@@ -176,11 +170,11 @@ class World {
     
         this.ctx.translate(this.camera_x, 0);
         this.addObjectsToMap(this.level.backgroundObjects);
-        this.addObjectsToMap(this.level.clouds);  
+        this.addObjectsToMap(this.level.clouds); 
+        this.addObjectsToMap(this.level.bottles);
         this.addToMap(this.character);
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.coins);
-        this.addObjectsToMap(this.level.bottles);
         this.addObjectsToMap(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);
     
@@ -228,52 +222,25 @@ class World {
         this.ctx.restore();
     }
 
-    playBackgroundMusic() {
-        this.backgroundMusic.play();
-    }
-
-    
-    stopBackgroundMusic() {
-        this.backgroundMusic.pause();
-        this.backgroundMusic.currentTime = 0;
-    }
-
-    
+ 
     toggleSound(muted) {
-        this.backgroundMusic.muted = muted;
-        this.character.walking_sound.muted = muted;
-        this.character.jumping_sound.muted = muted;
-        this.character.hurt_sound.muted = muted;
-        this.character.character_dead_sound.muted = muted;
-        this.level.enemies.forEach(enemy => {
-           if (enemy instanceof Chicken || enemy instanceof Chick) {
-            enemy.dying_sound.muted = muted;
-           }
-           if (enemy instanceof Endboss) {
-            enemy.attack_sound.muted = muted;
-            enemy.dying_sound.muted = muted;
-            }
-        });
-    
-        this.throwableObjects.forEach(obj => {
-           if (obj.throw_sound) {
-            obj.throw_sound.muted = muted;
-           }
-        });
+        window.audioManager.setMute(muted);
     }
 
     showWonScreen() {
-        this.stopBackgroundMusic();
-        this.gameWinSound.play();
+        document.getElementById('game-won').style.display = 'flex';
+        window.audioManager.stop('background');
+        window.audioManager.play('gameWin');
         this.stopGame();
-        document.getElementById('game-won').classList.remove('d-none');
+        showGameWon();
     }
     
     showLostScreen() {
-        this.stopBackgroundMusic();
-        this.gameOverSound.play();
+        document.getElementById('game-over').style.display = 'flex';
+        window.audioManager.stop('background');
+        window.audioManager.play('gameOver');
         this.stopGame();
-        document.getElementById('game-over').classList.remove('d-none');
+        showGameOver();
     }
     
 
@@ -282,45 +249,47 @@ class World {
     }
 
     stopGame() {
-    
+        window.audioManager.stopAll();
         this.gameIntervals.forEach(interval => clearInterval(interval));
         this.gameIntervals = [];
 
         this.level.enemies.forEach((enemy) => {
             if (enemy instanceof Endboss) {
-                enemy.stopSounds();
+                enemy.isDead = true; 
+                enemy.isAttacking = false; 
             }
         });
     }
 
-    stopAllSounds() {
-        this.backgroundMusic.pause();
-        this.backgroundMusic.currentTime = 0;
-        this.gameOverSound.pause();
-        this.gameOverSound.currentTime = 0;
-        this.gameWinSound.pause();
-        this.gameWinSound.currentTime = 0;
-    }
 
 
     reset() {
-        this.stopAllSounds();  
-        this.level.enemies.forEach((enemy) => {
-        if (enemy instanceof Endboss) {
-            enemy.stopSounds();
+        
+        if (this.character) {
+            this.character.reset();
         }
-      });
-
     
-    if (this.character) {
-        this.character.reset();
-        }
-     
-        this.throwableObjects = [];
-        this.camera_x = 0;
+        
+        this.level.enemies.forEach(enemy => {
+            if (enemy instanceof Endboss) {
+                enemy.isDead = false;
+                enemy.isAttacking = false;
+                enemy.energy = 100;
+            }
+        });
+    
+        
         this.statusBar.setPercentage(100);
         this.bottleBar.setBottles(0);
         this.coinBar.setCoins(0);
         this.endbossBar.setPercentage(100);
+    
+        
+        this.throwableObjects = [];
+        
+        
+        this.camera_x = 0;
+    
+        window.audioManager.stopAll();
     }
 }

@@ -4,12 +4,17 @@ function initLevel() {
 level1 = new Level (
     [
         new Chicken(),
-        new Chick(),    
+        new Chicken(),
+        new Chicken(),
+        new Chick(),
+        new Chick(), 
+        new Chick(),   
         new Endboss()
     ],
 
     [
-        new Cloud() 
+        new Cloud(),
+        
     ], 
 
     [

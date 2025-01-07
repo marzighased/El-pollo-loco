@@ -4,13 +4,47 @@ let keyboard = new Keyboard();
 let backgroundMusic;
 let intervalIds = [];
 
+
+window.restartGame = function() {
+    clearAllIntervals();
+    
+    document.getElementById('game-over').classList.add('d-none');
+    document.getElementById('game-won').classList.add('d-none');
+
+    if (world) {
+        window.audioManager.stopAll();
+        world.stopGame();  
+        world.reset();
+        world = null;  
+    }
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);  
+
+    document.getElementById('start-screen').classList.remove('d-none');
+    document.querySelector('.controls-container').style.display = 'flex';
+    document.getElementById('start-button').style.display = 'block'; 
+
+    initLevel();
+    showStartScreen();
+
+    updateMuteIcon();
+}
+
 function init() {
     canvas = document.getElementById('canvas');
     checkOrientation();
     showStartScreen();
-
-    if (world) {
-        world.toggleSound(isMuted);
+    
+    const startButton = document.getElementById('start-button'); 
+    if (startButton) {
+        startButton.onclick = function() {
+            hideAllOverlayScreens();
+            initLevel();
+            world = new World(canvas, keyboard);
+            world.toggleSound(isMuted);
+        };
     }
 }
 
@@ -29,9 +63,23 @@ function showStartScreen() {
             initLevel();
             world = new World(canvas, keyboard);
             world.toggleSound(isMuted);
-
         };
     }
+}
+
+function hideAllOverlayScreens() {
+    const overlays = [
+        'start-screen',
+        'game-over',
+        'game-won'
+    ];
+    
+    overlays.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.classList.add('d-none');
+        }
+    });
 }
 
 function restartGame() {
@@ -41,15 +89,24 @@ function restartGame() {
     document.getElementById('game-won').classList.add('d-none');
 
     if (world) {
+        window.audioManager.stopAll();  
+        world.stopGame();  
         world.reset();
-        world.character.reset();
+        world = null;  
     }
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);  
+
     document.getElementById('start-screen').classList.remove('d-none');
+    document.querySelector('.controls-container').style.display = 'flex';
+    document.getElementById('start-button').style.display = 'block';
 
     initLevel();
     showStartScreen();
-}
 
+    updateMuteIcon();
+}
 
 function clearAllIntervals() {
     const highestId = window.setInterval(() => {}, 0);
@@ -81,7 +138,6 @@ function showGameOver() {
     document.getElementById('game-over').classList.remove('d-none');
 }
 
-
 function showGameWon() {
     document.getElementById('game-won').classList.remove('d-none');
 }
@@ -102,6 +158,7 @@ function toggleMute() {
     if (world) {
         world.toggleSound(isMuted);
     }
+    window.audioManager.setMute(isMuted);
 }
 
 
