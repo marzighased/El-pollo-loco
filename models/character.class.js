@@ -220,7 +220,6 @@ class Character extends MovableObject {
      
                 if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
                     window.audioManager.stop('walking');
-                    this.walking_sound.currentTime = 0;
                 }
                 
                 if (this.world.keyboard.SPACE && !this.isAboveGround()) {
@@ -240,10 +239,12 @@ class Character extends MovableObject {
                 this.playAnimation(this.IMAGES_HURT);
             } else if (this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_JUMPING);
-            } else if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-                this.playAnimation(this.IMAGES_WALKING);
             } else {
-                this.startIdleTimers();
+                if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT) && !this.isAboveGround()) {
+                    this.playAnimation(this.IMAGES_WALKING);
+                } else if (!this.isAboveGround()) {
+                    this.startIdleTimers();
+                }
             }
         }, 50);
     }

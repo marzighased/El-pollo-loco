@@ -1,4 +1,3 @@
-
 body {
     display: flex;
     flex-direction: column;
@@ -33,7 +32,6 @@ canvas {
     z-index: 1;
 }
 
-
 .overlay-screen {
     position: absolute;
     top: 0;
@@ -55,7 +53,6 @@ canvas {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    
 }
 
 #game-over {
@@ -82,8 +79,8 @@ canvas {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw; 
-    height: 100vh; 
+    width: 100vw;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -92,12 +89,11 @@ canvas {
 }
 
 #game-won img {
-    width: 720px; 
-    height: 480px; 
-    object-fit: contain; 
+    width: 720px;
+    height: 480px;
+    object-fit: contain;
     position: relative;
 }
-
 
 .game-btn {
     position: absolute;
@@ -120,7 +116,6 @@ canvas {
     background-color: #ffd54f;
     transform: scale(1.1);
 }
-
 
 .controls-container {
     position: relative;
@@ -148,11 +143,10 @@ canvas {
     font-weight: bold;
 }
 
-
 .control-buttons {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 55px;
+    left: 20px;
     z-index: 102;
     padding: 2px;
 }
@@ -179,17 +173,19 @@ canvas {
 }
 
 .impressum-btn {
-    bottom: 15% !important; 
-    background-color: #ffd54f !important; 
-    font-size: 18px !important; 
+    bottom: 15% !important;
+    background-color: #ffd54f !important;
+    font-size: 18px !important;
 }
 
 #mute {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
-    transition: transform 0.2s;
-    background: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 12px;
+    transition: all 0.2s ease;
 }
 
 #mute:hover {
@@ -197,11 +193,9 @@ canvas {
     filter: brightness(1.2);
 }
 
-
 .d-none {
     display: none !important;
 }
-
 
 #orientation-hint {
     display: none;
@@ -219,40 +213,74 @@ canvas {
     z-index: 9999;
 }
 
-
-@media screen and (orientation: portrait) {
-    #orientation-hint {
-        display: flex;
-    }
-    
-    .canvas-container, 
-    #game-won,
-    #game-over,
-    h1,
-    .controls-container {
-        display: none !important;
-    }
+.mobile-controls {
+    display: none !important;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 10px;
 }
 
+.d-pad {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+}
 
-@media screen and (orientation: landscape) and (max-width: 768px) {
+.action-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.control-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.control-button img {
+    width: 30px;
+    height: 30px;
+    pointer-events: none;
+}
+
+.control-button:active {
+    background-color: rgba(255, 255, 255, 0.5);
+    transform: scale(0.95);
+}
+
+@media screen and (orientation: landscape) and (max-width: 932px) {
     body {
         margin: 0;
         padding: 0;
-        overflow: hidden;
         height: 100vh;
-    }
-
-    #orientation-hint {
-        display: none;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
     }
 
     .canvas-container {
-        display: block;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         margin: 0;
-        box-shadow: none;
+        position: relative;
     }
 
     canvas {
@@ -264,7 +292,41 @@ canvas {
         display: none;
     }
 
-    
+    .mobile-controls {
+        display: flex !important;
+        justify-content: space-between;
+        pointer-events: none;
+    }
+
+    .d-pad, .action-buttons {
+        pointer-events: auto;
+    }
+
+    .control-button {
+        width: 50px;
+        height: 50px;
+    }
+
+    .d-pad {
+        bottom: 20px;
+        left: 20px;
+    }
+
+    .action-buttons {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    * {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .control-buttons {
+        top: 45px;
+        left: 10px;
+    }
+
     #game-over, #game-won {
         width: 100vw;
         height: 100vh;
@@ -282,7 +344,6 @@ canvas {
         font-size: 18px;
     }
 
-    
     .controls-container {
         position: fixed;
         bottom: 10px;
@@ -295,34 +356,63 @@ canvas {
         z-index: 105;
     }
 
-    .control-key {
-        padding: 5px;
-        font-size: 14px;
-    }
-
     #start-button {
-        z-index: 106; 
-        bottom: auto; 
-        top: 50%; 
+        z-index: 106;
+        bottom: auto;
+        top: 50%;
         transform: translateY(-50%);
     }
 
     .impressum-btn {
-        bottom: auto !important; 
+        bottom: auto !important;
         font-size: 16px !important;
         padding: 8px 16px !important;
-        top: 62% !important; 
-        transform: translateY(-50%) !important; 
-        z-index: 106; 
+        top: 62% !important;
+        transform: translateY(-50%) !important;
+        z-index: 106;
+    }
+}
+
+@media screen and (orientation: portrait) {
+    #orientation-hint {
+        display: flex !important;
+    }
+    
+    .canvas-container, 
+    #game-won,
+    #game-over,
+    h1,
+    .controls-container {
+        display: none !important;
     }
 
-    .control-buttons {
-        top: 10px;
+    .mobile-controls {
+        display: none !important;
+    }
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .control-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .d-pad, .action-buttons {
+        bottom: 10px;
+    }
+}
+
+@media screen and (orientation: landscape) and (max-height: 400px) {
+    .control-button {
+        width: 35px;
+        height: 35px;
+    }
+
+    .d-pad {
+        left: 10px;
+    }
+
+    .action-buttons {
         right: 10px;
-    }
-
-    #mute {
-        width: 30px;
-        height: 30px;
     }
 }

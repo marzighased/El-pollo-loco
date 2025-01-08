@@ -36,6 +36,7 @@ function init() {
     canvas = document.getElementById('canvas');
     checkOrientation();
     showStartScreen();
+    initMobileControls();
     
     const startButton = document.getElementById('start-button'); 
     if (startButton) {
@@ -132,6 +133,74 @@ function checkOrientation() {
 }
 
 
+
+function initMobileControls() {
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        const mobileControls = document.getElementById('mobile-controls');
+        if (mobileControls) {
+            mobileControls.style.display = 'flex';
+        }
+
+        const buttonLeft = document.getElementById('button-left');
+        const buttonRight = document.getElementById('button-right');
+        const buttonJump = document.getElementById('button-jump');
+        const buttonThrow = document.getElementById('button-throw');
+
+        buttonLeft.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            keyboard.LEFT = true;
+        }, { passive: false });
+
+        buttonLeft.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keyboard.LEFT = false;
+        }, { passive: false });
+
+        buttonRight.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            keyboard.RIGHT = true;
+        }, { passive: false });
+
+        buttonRight.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keyboard.RIGHT = false;
+        }, { passive: false });
+
+        buttonJump.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            keyboard.SPACE = true;
+        }, { passive: false });
+
+        buttonJump.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keyboard.SPACE = false;
+        }, { passive: false });
+
+        buttonThrow.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            keyboard.D = true;
+        }, { passive: false });
+
+        buttonThrow.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            keyboard.D = false;
+        }, { passive: false });
+
+        document.querySelectorAll('.control-button').forEach(button => {
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMobileControls();
+});
 
 
 function showGameOver() {

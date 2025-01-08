@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>El Pollo Loco</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="img_pollo_locco/img/7_statusbars/3_icons/chicken.png">
 </head>
 <body onload="init()">
     <h1>El pollo loco</h1>
@@ -42,6 +43,25 @@
         <button id="restartButton" style="display: none;" onclick="restartGame()">
             RESTART GAME
         </button>
+
+        <div id="mobile-controls" class="mobile-controls">
+            <div class="d-pad">
+                <button id="button-left" class="control-button direction-button">
+                    <img src="img_pollo_locco/img/7_statusbars/3_icons/left-arrow.png" alt="Left">
+                </button>
+                <button id="button-right" class="control-button direction-button">
+                    <img src="img_pollo_locco/img/7_statusbars/3_icons/right-arrow.png" alt="Right">
+                </button>
+            </div>
+            <div class="action-buttons">
+                <button id="button-jump" class="control-button action-button">
+                    <img src="img_pollo_locco/img/7_statusbars/3_icons/jump.png" alt="Jump">
+                </button>
+                <button id="button-throw" class="control-button action-button">
+                    <img src="img_pollo_locco/img/7_statusbars/3_icons/throw.png" alt="Throw">
+                </button>
+            </div>
+        </div>
     </div>
 
     
