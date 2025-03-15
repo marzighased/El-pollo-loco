@@ -1,3 +1,8 @@
+/**
+ * Final boss enemy with special behaviors
+ * @class Endboss
+ * @extends MovableObject
+ */
 class Endboss extends MovableObject {
     
     height = 400;
@@ -23,7 +28,7 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G17.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G18.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G19.png',
-        'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G20.png'
+        'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G20.png' 
     ];
 
     IMAGES_HURT = [
@@ -37,7 +42,10 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G25.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
-
+    /**
+     * Creates a new boss instance
+     * @constructor
+     */
     constructor() {
         super().loadImage('img_pollo_locco/img/4_enemie_boss_chicken/2_alert/G5.png');
         this.loadImages(this.IMAGES_WALKING);
@@ -71,7 +79,9 @@ class Endboss extends MovableObject {
         if (!this.world || !this.world.character) return false;
         return Math.abs(this.world.character.x - this.x) < 500;
     }
-
+    /**
+     * Starts the boss attack sequence
+     */
     startAttacking() {
         if (!this.isAttacking) {
             this.isAttacking = true;
@@ -81,7 +91,9 @@ class Endboss extends MovableObject {
             }, 1000);
         }
     }
-
+    /**
+     * Handles damage taken by the boss
+     */
     hit() {
         if (this.isDead) return;
         

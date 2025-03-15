@@ -48,7 +48,7 @@ class Chicken extends MovableObject {
 
     hit() {
         this.energy = 0;
-        window.audioManager.play('chickenDie');
+        window.audioManager.play('chickenDie'); 
         this.playAnimation(this.IMAGES_DEAD);
     }
 

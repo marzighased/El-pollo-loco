@@ -1,3 +1,9 @@
+/**
+ * Base class for all objects that can move in the game
+ * @class MovableObject
+ * @extends DrawableObject
+ */
+
 class MovableObject extends DrawableObject {
     
     speed = 0.15;
@@ -7,7 +13,9 @@ class MovableObject extends DrawableObject {
     energy = 100;
     lastHit = 0;
 
-
+    /**
+     * Applies gravity physics to the object
+     */
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
@@ -21,12 +29,16 @@ class MovableObject extends DrawableObject {
         if (this instanceof ThrowableObject) {      // Throwable object should always fall
             return true;
         } else {
-            return this.y < 150;   
+            return this.y < 150;    
  
         }
     } 
 
-
+    /**
+     * Checks if this object is colliding with another object
+     * @param {MovableObject} mo - The object to check collision with
+     * @returns {boolean} True if collision detected
+     */
     // character.isColliding(chicken);
     isColliding(mo) {
         return this.x + this.offset.x + this.width - this.offset.width > mo.x + mo.offset.x &&
@@ -55,7 +67,10 @@ class MovableObject extends DrawableObject {
         return this.energy == 0;
     }
 
-
+    /**
+     * Plays an animation sequence from the provided images array
+     * @param {Array<string>} images - Array of image paths
+     */
     playAnimation(images) {
         let i = this.currentImage % images.length;   // let i = 0 % 6;
         // i = 0, 1, 2, 3, 4, 5, 0, 1, 2, ...

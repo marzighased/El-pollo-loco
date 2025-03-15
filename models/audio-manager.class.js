@@ -1,3 +1,7 @@
+/**
+ * Manages all sound effects and music for the game
+ * @class AudioManager
+ */
 class AudioManager {
     constructor() {
         this.sounds = {
@@ -15,7 +19,7 @@ class AudioManager {
         };
 
         
-        this.setDefaultVolumes({
+        this.setDefaultVolumes({ 
             background: 0.1,
             walking: 0.5,
             jumping: 0.5,
@@ -39,13 +43,20 @@ class AudioManager {
             }
         }
     }
-
+    /**
+     * Plays a specific sound effect
+     * @param {string} soundName - Name of the sound to play
+     */
     play(soundName) {
         if (!this.isMuted && this.sounds[soundName]) {
             this.sounds[soundName].play();
         }
     }
-
+    
+     /**
+     * Stops a specific sound effect
+     * @param {string} soundName - Name of the sound to stop
+     */
     stop(soundName) {
         if (this.sounds[soundName]) {
             this.sounds[soundName].pause();
@@ -74,6 +85,10 @@ class AudioManager {
             sound.muted = this.isMuted;
         });
     }
+    /**
+     * Plays a sound in loop mode
+     * @param {string} soundName - Name of the sound to loop
+     */
 
     playLoop(soundName) {
         if (this.sounds[soundName]) {

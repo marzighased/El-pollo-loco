@@ -11,6 +11,6 @@ class Level {
          this.clouds = clouds;
          this.backgroundObjects = backgroundObjects;
          this.coins = coins;
-         this.bottles = bottles;
+         this.bottles = bottles; 
     }  
 } 

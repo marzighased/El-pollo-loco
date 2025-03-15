@@ -16,7 +16,7 @@ class Character extends MovableObject {
     ];
 
     IMAGES_JUMPING = [
-        'img_pollo_locco/img/2_character_pepe/3_jump/J-31.png',
+        'img_pollo_locco/img/2_character_pepe/3_jump/J-31.png', 
         'img_pollo_locco/img/2_character_pepe/3_jump/J-32.png',
         'img_pollo_locco/img/2_character_pepe/3_jump/J-33.png',
         'img_pollo_locco/img/2_character_pepe/3_jump/J-34.png',
@@ -74,7 +74,10 @@ class Character extends MovableObject {
     idleTimer; 
     longIdleTimer;
     deathAnimationPlayed = false;
-
+    /**
+     * Creates a character instance and loads all required assets
+     * @constructor
+     */
     constructor() {
         super().loadImage('img_pollo_locco/img/2_character_pepe/2_walk/W-21.png');
         this.loadImages(this.IMAGES_WALKING);
@@ -121,6 +124,11 @@ class Character extends MovableObject {
         }, 1000 / 25);
     }
 
+    /**
+     * Handles damage taken by the character
+     * @param {number} damage - Amount of damage to apply
+     */
+
     hit(damage) {
         if (!this.isHurt()) {
             this.energy -= damage;
@@ -161,7 +169,9 @@ class Character extends MovableObject {
     isDead() {
         return this.energy <= 0;
     }
-
+    /**
+     * Plays the death animation sequence
+     */
     playDeathAnimation() {
         if (!this.deathAnimationPlayed) {
             this.deathAnimationPlayed = true;
@@ -248,7 +258,9 @@ class Character extends MovableObject {
             }
         }, 50);
     }
-
+    /**
+     * Resets the character to initial state
+     */
     reset() {
         
         this.energy = 100;

@@ -1,3 +1,7 @@
+/**
+ * Main game world that manages all game objects and logic
+ * @class World
+ */
 class World {
     character = new Character();
     level;
@@ -12,7 +16,12 @@ class World {
     throwableObjects = [];
     gameIntervals = [];
     
-
+    /**
+     * Creates a new game world instance
+     * @constructor
+     * @param {HTMLCanvasElement} canvas - The canvas element for rendering
+     * @param {Keyboard} keyboard - Keyboard input handler
+     */
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.canvas = canvas;
@@ -22,7 +31,7 @@ class World {
         this.draw();
         this.run();
         this.spawnNewEnemies();
-        window.audioManager.playLoop('background'); 
+        window.audioManager.playLoop('background');  
         
     }
 
@@ -38,6 +47,9 @@ class World {
             }
         });
     }
+    /**
+     * Runs the main game loop including collision detection
+     */
 
     run() {
         const interval = setInterval(() => {
@@ -49,7 +61,9 @@ class World {
         }, 200);
         this.gameIntervals.push(interval);
     }
-
+    /**
+     * Spawns new enemies periodically
+     */
     spawnNewEnemies() {
         const interval = setInterval(() => {
             if (!this.character.isDead() && this.level.enemies.length < 15) {
@@ -75,7 +89,9 @@ class World {
         this.gameIntervals.push(interval);
     }
 
-    
+    /**
+     * Checks for collisions between character and enemies
+     */
     checkCollisions() {
         const interval = setInterval(() => {
             if (!this.character) return; 
@@ -206,7 +222,9 @@ class World {
             });
         });
     }
-
+    /**
+     * Renders all game objects to the canvas
+     */
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     

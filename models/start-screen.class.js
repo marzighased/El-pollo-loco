@@ -16,5 +16,5 @@ class StartScreen extends DrawableObject {
         this.img.onload = () => {
             ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
         };
-    }
+    } 
 }   

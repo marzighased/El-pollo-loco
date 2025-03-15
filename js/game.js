@@ -4,7 +4,10 @@ let keyboard = new Keyboard();
 let backgroundMusic;
 let intervalIds = [];
 
-
+/**
+ * Restarts the game by clearing all intervals, removing overlays, and resetting the world
+ * @function restartGame
+ */
 window.restartGame = function() {
     clearAllIntervals();
     
@@ -18,7 +21,7 @@ window.restartGame = function() {
         world = null;  
     }
 
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('canvas'); 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);  
 
@@ -32,6 +35,10 @@ window.restartGame = function() {
     updateMuteIcon();
 }
 
+/**
+ * Initializes the game by setting up canvas and binding event handlers
+ * @function init
+ */
 function init() {
     canvas = document.getElementById('canvas');
     checkOrientation();
@@ -108,14 +115,20 @@ function restartGame() {
 
     updateMuteIcon();
 }
-
+/**
+ * Clears all active intervals in the window
+ * @function clearAllIntervals
+ */
 function clearAllIntervals() {
     const highestId = window.setInterval(() => {}, 0);
     for (let i = 0; i <= highestId; i++) {
         window.clearInterval(i);
     }
 }
-
+/**
+ * Detects device orientation and shows hint if needed
+ * @function checkOrientation
+ */
 function checkOrientation() {
  
     const orientationHint = document.getElementById('orientation-hint');
@@ -132,7 +145,10 @@ function checkOrientation() {
     }
 }
 
-
+/**
+ * Sets up mobile touch controls for the game
+ * @function initMobileControls
+ */
 
 function initMobileControls() {
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
@@ -220,6 +236,10 @@ function stopAllSounds() {
 
 let isMuted = false;
 
+/**
+ * Toggles the game sound on/off
+ * @function toggleMute
+ */
 function toggleMute() {
     isMuted = !isMuted;
     updateMuteIcon();
@@ -304,7 +324,12 @@ window.addEventListener('keyup', (e) => {
 
 window.addEventListener('resize', checkOrientation);
 window.addEventListener('orientationchange', checkOrientation);
-
+/**
+ * Creates a stoppable interval that can be tracked for cleanup
+ * @function setStopableInterval
+ * @param {Function} fn - Function to execute
+ * @param {number} time - Interval time in milliseconds
+ */
 
 function setStopableInterval(fn, time) {
     let id = setInterval(fn, time);
