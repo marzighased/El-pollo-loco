@@ -49,13 +49,12 @@ class ThrowableObject extends MovableObject {
     splash() {
         this.isSplashed = true;
         window.audioManager.play('bottleSplash');
-
+    
         let currentFrame = 0;
         let splashInterval = setInterval(() => {
-            //this.playAnimation(this.IMAGES_SPLASH);
-            if (this.currentImage >= this.IMAGES_SPLASH.length) {
+            if (currentFrame < this.IMAGES_SPLASH.length) {
                 this.img = this.imageCache[this.IMAGES_SPLASH[currentFrame]];
-            currentFrame++;
+                currentFrame++;
             } else {
                 clearInterval(splashInterval);
                 
