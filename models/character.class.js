@@ -71,10 +71,13 @@ class Character extends MovableObject {
 
     world;
     keyboard;
-    idleTimer; 
-    longIdleTimer;
+    lastIdleStart;
     deathAnimationPlayed = false;
     isJumping = false;
+    isMoving = false;
+    isThrowingBottle = false;
+    lastBottleThrow = 0;
+    
     /**
      * Creates a character instance and loads all required assets
      * @constructor
@@ -88,9 +91,8 @@ class Character extends MovableObject {
         this.loadImages(this.IMAGES_IDLE);
         this.loadImages(this.IMAGES_LONGIDLE);
 
-
         this.y_ground = 140;
-        this.lastIdleStart = new Date().getTime(); 
+        this.lastIdleStart = new Date().getTime();
 
         this.offset = {
             x: 20,
@@ -104,10 +106,12 @@ class Character extends MovableObject {
 
     moveRight() {
         this.x += this.speed;
+        this.isMoving = true;
     }
 
     moveLeft() {
         this.x -= this.speed;
+        this.isMoving = true;
     }
 
     jump() {
@@ -145,13 +149,6 @@ class Character extends MovableObject {
             } else {
                 window.audioManager.play('hurt');
             }
-            
-            
-            if (this.otherDirection) {
-                this.x += 20;
-            } else {
-                this.x -= 20;
-            }
         }
     }
 
@@ -172,6 +169,13 @@ class Character extends MovableObject {
     isDead() {
         return this.energy <= 0;
     }
+    
+    isThrowing() {
+        let timepassed = new Date().getTime() - this.lastBottleThrow;
+        timepassed = timepassed / 1000;
+        return timepassed < 0.5; 
+    }
+    
     /**
      * Plays the death animation sequence
      */
@@ -208,16 +212,21 @@ class Character extends MovableObject {
     animateMovement() {
         setInterval(() => {
             if (!this.isDead()) { 
+                this.isMoving = false; 
+                
+                if (this.world.keyboard.D && this.bottles > 0) {
+                    this.lastBottleThrow = new Date().getTime(); 
+                    this.lastIdleStart = new Date().getTime(); 
+                }
                 
                 if (this.world.keyboard.SPACE && !this.isAboveGround()) {
                     this.jump();
-                    this.resetTimers();
+                    this.lastIdleStart = new Date().getTime(); 
                 }
 
                 if (this.world.keyboard.RIGHT && this.x < 2200) {
                     this.moveRight();
                     this.otherDirection = false;
-                    this.resetTimers();
                     if (!this.isAboveGround()) {
                         window.audioManager.play('walking');
                     }
@@ -226,14 +235,20 @@ class Character extends MovableObject {
                 if (this.world.keyboard.LEFT && this.x > -100) {
                     this.moveLeft();
                     this.otherDirection = true;
-                    this.resetTimers();
                     if (!this.isAboveGround()) {
                         window.audioManager.play('walking');
                     }
                 }
      
-                if (!this.world.keyboard.RIGHT && !this.world.keyboard.LEFT) {
+                if (!this.isMoving && !this.isAboveGround() && !this.isJumping) {
                     window.audioManager.stop('walking');
+
+                    if (this.lastActionWasMovingOrJumping) {
+                        this.lastIdleStart = new Date().getTime();
+                        this.lastActionWasMovingOrJumping = false;
+                    }
+                } else if (this.isMoving || this.isJumping) {
+                    this.lastActionWasMovingOrJumping = true;
                 }
                 
                 this.world.camera_x = -this.x + 100;
@@ -242,8 +257,7 @@ class Character extends MovableObject {
     }
 
     animateImages() {
-        let wasAboveGround = false; 
-        let lastIdleStart = 0; 
+        let wasAboveGround = false;
         
         setInterval(() => {
             if (this.isDead()) {
@@ -258,29 +272,31 @@ class Character extends MovableObject {
             
             if (this.isAboveGround()) {
                 wasAboveGround = true;
-                this.resetTimers(); 
+                this.isJumping = true;
                 this.playAnimation(this.IMAGES_JUMPING);
                 return;
             }
             
             if (wasAboveGround) {
                 wasAboveGround = false;
-                this.resetTimers();
-            
-                lastIdleStart = new Date().getTime();
-                this.startIdleTimers();
+                this.isJumping = false;
+                this.lastIdleStart = new Date().getTime(); 
             }
             
-            if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT) && !this.isAboveGround()) {
+            if (this.isMoving && !this.isAboveGround()) {
                 this.playAnimation(this.IMAGES_WALKING);
-                this.resetTimers();
+                return;
+            }
+            
+            if (this.isThrowing()) {
+                this.playAnimation(this.IMAGES_IDLE); 
                 return;
             }
             
             const currentTime = new Date().getTime();
-            const idleTime = (currentTime - lastIdleStart) / 1000;
+            const idleTime = (currentTime - this.lastIdleStart) / 1000;
             
-            if (idleTime > 4 && !this.isAboveGround()) {
+            if (idleTime > 4 && !this.isAboveGround() && !this.isMoving && !this.isThrowing()) {
                 this.playAnimation(this.IMAGES_LONGIDLE);
             } else {
                 this.playAnimation(this.IMAGES_IDLE);
@@ -288,16 +304,10 @@ class Character extends MovableObject {
         }, 150);
     }
 
-    animate() {
-        this.animateMovement();
-        this.animateImages();
-    }
-
     /**
      * Resets the character to initial state
      */
     reset() {
-        
         this.energy = 100;
         this.coins = 0;
         this.bottles = 0;
@@ -305,20 +315,10 @@ class Character extends MovableObject {
         this.y = 80;
         this.speed = 10;
         this.deathAnimationPlayed = false;
-    }
-
-    resetTimers() {
-        if (this.idleTimer) {
-            clearTimeout(this.idleTimer);
-            this.idleTimer = null;
-        }
-        if (this.longIdleTimer) {
-            clearTimeout(this.longIdleTimer);
-            this.longIdleTimer = null;
-        }
-    }
-
-    startIdleTimers() { 
-        this.resetTimers();
+        this.isJumping = false;
+        this.isMoving = false;
+        this.lastIdleStart = new Date().getTime();
+        this.lastActionWasMovingOrJumping = false;
+        this.lastBottleThrow = 0;
     }
 }

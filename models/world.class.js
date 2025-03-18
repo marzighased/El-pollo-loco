@@ -89,9 +89,6 @@ class World {
         this.gameIntervals.push(interval);
     }
 
-    /**
-     * Checks for collisions between character and enemies
-     */
     checkCollisions() {
         const interval = setInterval(() => {
             if (!this.character) return; 
@@ -127,30 +124,18 @@ class World {
                                 this.character.hit(10);
                                 this.statusBar.setPercentage(this.character.energy);
                                 
-                                if (characterCenter < enemyCenter) {
-                                    this.character.x -= 20;
-                                } else {
-                                    this.character.x += 20;
-                                }
-    
                             } else if (enemy instanceof Chick) {
                                 this.character.hit(5);
                                 this.statusBar.setPercentage(this.character.energy);
-                            
-                                if (characterCenter < enemyCenter) {
-                                    this.character.x -= 30;
-                                } else {
-                                    this.character.x += 30;
-                                }
     
                             } else if (enemy instanceof Endboss && enemy.isAttacking) {
                                 this.character.hit(25);
                                 this.statusBar.setPercentage(this.character.energy);
                                 
                                 if (characterCenter < enemyCenter) {
-                                    this.character.x -= 100;
+                                    this.character.x -= 20;
                                 } else {
-                                    this.character.x += 100;
+                                    this.character.x += 20;
                                 }
                             }
     
