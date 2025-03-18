@@ -19,7 +19,7 @@ class World {
     /**
      * Creates a new game world instance
      * @constructor
-     * @param {HTMLCanvasElement} canvas - The canvas element for rendering
+     * @param {HTMLCanvasElement} canvas - The canvas element for rendering 
      * @param {Keyboard} keyboard - Keyboard input handler
      */
     constructor(canvas, keyboard) {
@@ -128,9 +128,9 @@ class World {
                                 this.statusBar.setPercentage(this.character.energy);
                                 
                                 if (characterCenter < enemyCenter) {
-                                    this.character.x -= 50;
+                                    this.character.x -= 20;
                                 } else {
-                                    this.character.x += 50;
+                                    this.character.x += 20;
                                 }
     
                             } else if (enemy instanceof Chick) {
@@ -183,6 +183,7 @@ class World {
     checkThrowObjects() {
         if (this.keyboard.D && this.character.bottles > 0) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+            bottle.world = this;
             this.throwableObjects.push(bottle);
             this.character.bottles--;
             this.bottleBar.setBottles(this.character.bottles);
@@ -213,13 +214,23 @@ class World {
         this.throwableObjects.forEach((bottle, bottleIndex) => {
             this.level.enemies.forEach((enemy) => {
                 if (enemy instanceof Endboss) {
-                    if (bottle.isColliding(enemy)) {
+                    if (bottle.isColliding(enemy) && !bottle.isSplashed) {
                         enemy.hit();
-                        this.throwableObjects.splice(bottleIndex, 1);
+                        bottle.splash();
+                        //this.throwableObjects.splice(bottleIndex, 1);
                         this.endbossBar.setPercentage(enemy.energy);
                     }
+                } else if ((enemy instanceof Chicken || enemy instanceof Chick) && 
+                       bottle.isColliding(enemy) && !bottle.isSplashed) {
+
+                    enemy.hit();
+                    bottle.splash();
                 }
             });
+
+            if (bottle.y >= 350 && !bottle.isSplashed) {
+                bottle.splash();
+            }
         });
     }
     /**

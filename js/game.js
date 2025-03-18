@@ -27,7 +27,7 @@ window.restartGame = function() {
 
     document.getElementById('start-screen').classList.remove('d-none');
     document.querySelector('.controls-container').style.display = 'flex';
-    document.getElementById('start-button').style.display = 'block'; 
+    document.getElementById('start-button').style.display = 'block';  
 
     initLevel();
     showStartScreen();

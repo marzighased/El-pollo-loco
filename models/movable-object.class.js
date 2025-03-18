@@ -14,7 +14,7 @@ class MovableObject extends DrawableObject {
     lastHit = 0;
 
     /**
-     * Applies gravity physics to the object
+     * Applies gravity physics to the object 
      */
     applyGravity() {
         setInterval(() => {

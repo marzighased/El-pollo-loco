@@ -18,7 +18,7 @@ class Chicken extends MovableObject {
         this.loadImages(this.IMAGES_WALKING);
         this.loadImages(this.IMAGES_DEAD);
          
-        this.offset = { 
+        this.offset = {  
             x: 5,
             y: 5,
             width: 10,

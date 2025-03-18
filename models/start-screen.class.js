@@ -14,7 +14,7 @@ class StartScreen extends DrawableObject {
         let canvas = document.getElementById('canvas');
         let ctx = canvas.getContext('2d');
         this.img.onload = () => {
-            ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+            ctx.drawImage(this.img, this.x, this.y, this.width, this.height); 
         };
     } 
 }   

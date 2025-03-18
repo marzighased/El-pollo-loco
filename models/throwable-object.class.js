@@ -4,6 +4,17 @@
  * @extends MovableObject
  */
 class ThrowableObject extends MovableObject {
+
+    IMAGES_SPLASH = [
+        'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/1_bottle_splash.png',
+        'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/2_bottle_splash.png',
+        'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/3_bottle_splash.png',
+        'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/4_bottle_splash.png',
+        'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/5_bottle_splash.png',
+        'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png'
+    ];
+
+    isSplashed = false;
     /**
      * Creates a new throwable object
      * @constructor
@@ -12,6 +23,7 @@ class ThrowableObject extends MovableObject {
      */
     constructor(x, y) {
         super().loadImage('img_pollo_locco/img/6_salsa_bottle/salsa_bottle.png');
+        this.loadImages(this.IMAGES_SPLASH);
         this.x = x;
         this.y = y;
         this.height = 60;
@@ -20,14 +32,40 @@ class ThrowableObject extends MovableObject {
     }
 
     /**
-     * Initiates the throwing motion with physics
+     * Initiates the throwing motion with physics 
      */
     throw() {
         this.speedY = 30;
         this.applyGravity();
         window.audioManager.play('throwBottle');
+
         setInterval(() => {
-           this.x += 10;
+            if (!this.isSplashed) {
+               this.x += 10;
+            }
         }, 25); 
+    }
+
+    splash() {
+        this.isSplashed = true;
+        window.audioManager.play('bottleSplash');
+
+        let currentFrame = 0;
+        let splashInterval = setInterval(() => {
+            //this.playAnimation(this.IMAGES_SPLASH);
+            if (this.currentImage >= this.IMAGES_SPLASH.length) {
+                this.img = this.imageCache[this.IMAGES_SPLASH[currentFrame]];
+            currentFrame++;
+            } else {
+                clearInterval(splashInterval);
+                
+                if (this.world) {
+                    const index = this.world.throwableObjects.indexOf(this);
+                    if (index > -1) {
+                        this.world.throwableObjects.splice(index, 1);
+                    }
+                }
+            }
+        }, 100);
     }
 }   

@@ -21,7 +21,7 @@ class GameState {
     } 
 
     startGame() {
-        this.currentState = GameState.PLAYING;                                       // start Game
+        this.currentState = GameState.PLAYING;                                       // start Game 
         document.querySelector('.start-button').style.display = 'none';              // hide Elements
         document.querySelector('.controls-container').style.display = 'none';        //hide Elements
 
