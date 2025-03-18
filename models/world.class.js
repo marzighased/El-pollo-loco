@@ -54,12 +54,16 @@ class World {
     run() {
         const interval = setInterval(() => {
             this.checkCollisions();
-            this.checkThrowObjects();
             this.checkBottleCollisions();
             this.checkCollisionWithCoins();
             this.checkBottleHitsEndboss();
         }, 200);
         this.gameIntervals.push(interval);
+
+        const throwInterval = setInterval(() => {
+            this.checkThrowObjects();
+        }, 100);
+        this.gameIntervals.push(throwInterval);
     }
     /**
      * Spawns new enemies periodically
