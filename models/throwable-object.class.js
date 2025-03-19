@@ -1,10 +1,19 @@
 /**
- * Represents objects that can be thrown by the player
+ * @file throwable-object.class.js
+ * @description Implementation of throwable objects (bottles) in El Pollo Loco game
+ */
+
+/**
+ * ThrowableObject class that extends MovableObject
+ * This class represents the salsa bottles that can be thrown by the player character
  * @class ThrowableObject
  * @extends MovableObject
  */
 class ThrowableObject extends MovableObject {
-
+    /**
+     * Array of image paths for bottle splash animation
+     * @type {Array<string>}
+     */
     IMAGES_SPLASH = [
         'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/1_bottle_splash.png',
         'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/2_bottle_splash.png',
@@ -14,12 +23,18 @@ class ThrowableObject extends MovableObject {
         'img_pollo_locco/img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png'
     ];
 
-    isSplashed = false;
     /**
-     * Creates a new throwable object
+     * Flag indicating if the bottle has splashed
+     * @type {boolean}
+     */
+    isSplashed = false;
+    
+    /**
+     * Constructor for ThrowableObject class
+     * Initializes position, dimensions, appearance, and throws the object
      * @constructor
-     * @param {number} x - Initial x position
-     * @param {number} y - Initial y position
+     * @param {number} x - Initial x position of the throwable object
+     * @param {number} y - Initial y position of the throwable object
      */
     constructor(x, y) {
         super().loadImage('img_pollo_locco/img/6_salsa_bottle/salsa_bottle.png');
@@ -32,7 +47,9 @@ class ThrowableObject extends MovableObject {
     }
 
     /**
-     * Initiates the throwing motion with physics 
+     * Initiates the throwing motion with physics
+     * Applies gravity, horizontal movement, and plays sound effect
+     * @method throw
      */
     throw() {
         this.speedY = 30;
@@ -46,6 +63,11 @@ class ThrowableObject extends MovableObject {
         }, 25); 
     }
 
+    /**
+     * Handles bottle splash effect when it hits something or the ground
+     * Plays animation and sound effect, then removes the object from the game
+     * @method splash
+     */
     splash() {
         this.isSplashed = true;
         window.audioManager.play('bottleSplash');
@@ -67,4 +89,4 @@ class ThrowableObject extends MovableObject {
             }
         }, 100);
     }
-}   
+}

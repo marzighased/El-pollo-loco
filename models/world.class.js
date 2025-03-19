@@ -1,23 +1,53 @@
 /**
- * Main game world that manages all game objects and logic
+ * @file world.class.js
+ * @description Main game world controller for El Pollo Loco game
+ */
+
+/**
+ * World class that manages all game objects and game logic
+ * This class is responsible for rendering, collision detection, and game state management
  * @class World
  */
 class World {
+    /** The main playable character @type {Character} */
     character = new Character();
+    
+    /** Current level containing all game objects @type {Level} */
     level;
+    
+    /** Canvas element reference @type {HTMLCanvasElement} */
     canvas;
+    
+    /** Canvas rendering context @type {CanvasRenderingContext2D} */
     ctx;
+    
+    /** Keyboard input handler @type {Keyboard} */
     keyboard;
+    
+    /** Camera horizontal offset for scrolling @type {number} */
     camera_x = 0;
+    
+    /** Health status bar UI element @type {StatusBar} */
     statusBar = new StatusBar();
+    
+    /** Bottle count UI element @type {BottleBar} */
     bottleBar = new BottleBar();
+    
+    /** Coin count UI element @type {CoinBar} */
     coinBar = new CoinBar();
+    
+    /** Endboss health UI element @type {EndbossBar} */
     endbossBar = new EndbossBar();
+    
+    /** Array of currently active throwable objects @type {Array<ThrowableObject>} */
     throwableObjects = [];
+    
+    /** Array of all interval IDs for proper cleanup @type {Array<number>} */
     gameIntervals = [];
     
     /**
      * Creates a new game world instance
+     * Initializes all game elements and starts the game loop
      * @constructor
      * @param {HTMLCanvasElement} canvas - The canvas element for rendering 
      * @param {Keyboard} keyboard - Keyboard input handler
@@ -32,10 +62,13 @@ class World {
         this.run();
         this.spawnNewEnemies();
         window.audioManager.playLoop('background');  
-        
     }
 
-
+    /**
+     * Sets up references between the world and its game objects
+     * Establishes the world object as the parent of characters and enemies
+     * @method setWorld
+     */
     setWorld() {  
         this.character.world = this;
         this.character.keyboard = this.keyboard;
@@ -47,10 +80,12 @@ class World {
             }
         });
     }
+
     /**
      * Runs the main game loop including collision detection
+     * Sets up various interval timers for game mechanics
+     * @method run
      */
-
     run() {
         const interval = setInterval(() => {
             this.checkCollisions();
@@ -65,8 +100,11 @@ class World {
         }, 100);
         this.gameIntervals.push(throwInterval);
     }
+
     /**
-     * Spawns new enemies periodically
+     * Spawns new enemies periodically throughout the level
+     * Creates chickens and chicks at random positions ahead of the player
+     * @method spawnNewEnemies
      */
     spawnNewEnemies() {
         const interval = setInterval(() => {
@@ -93,6 +131,11 @@ class World {
         this.gameIntervals.push(interval);
     }
 
+    /**
+     * Checks for collisions between the character and enemies
+     * Handles jumping on enemies, taking damage, and death sequences
+     * @method checkCollisions
+     */
     checkCollisions() {
         const interval = setInterval(() => {
             if (!this.character) return; 
@@ -167,8 +210,11 @@ class World {
         this.gameIntervals.push(interval);
     }
 
-    
-
+    /**
+     * Checks for bottle throw actions and creates new throwable objects
+     * Triggered when the D key is pressed and player has bottles
+     * @method checkThrowObjects
+     */
     checkThrowObjects() {
         if (this.keyboard.D && this.character.bottles > 0) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
@@ -179,6 +225,11 @@ class World {
         }
     }
 
+    /**
+     * Checks for collisions between character and coins
+     * Handles coin collection and updates UI
+     * @method checkCollisionWithCoins
+     */
     checkCollisionWithCoins() {
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
@@ -189,6 +240,11 @@ class World {
         });
     }
 
+    /**
+     * Checks for collisions between character and bottles
+     * Handles bottle collection and updates UI
+     * @method checkBottleCollisions
+     */
     checkBottleCollisions() {
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle)) {
@@ -199,6 +255,11 @@ class World {
         });
     }
 
+    /**
+     * Checks for collisions between thrown bottles and enemies
+     * Handles damage to enemies and bottle splash effects
+     * @method checkBottleHitsEndboss
+     */
     checkBottleHitsEndboss() {
         this.throwableObjects.forEach((bottle, bottleIndex) => {
             this.level.enemies.forEach((enemy) => {
@@ -206,7 +267,6 @@ class World {
                     if (bottle.isColliding(enemy) && !bottle.isSplashed) {
                         enemy.hit();
                         bottle.splash();
-                        //this.throwableObjects.splice(bottleIndex, 1);
                         this.endbossBar.setPercentage(enemy.energy);
                     }
                 } else if ((enemy instanceof Chicken || enemy instanceof Chick) && 
@@ -222,8 +282,11 @@ class World {
             }
         });
     }
+
     /**
      * Renders all game objects to the canvas
+     * Handles camera translation and object drawing order
+     * @method draw
      */
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -238,7 +301,6 @@ class World {
         this.addObjectsToMap(this.throwableObjects);
         this.ctx.translate(-this.camera_x, 0);
     
-        
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
@@ -251,12 +313,24 @@ class World {
         });
     }
 
+    /**
+     * Adds multiple objects to the game map
+     * Helper method for drawing collections of game objects
+     * @method addObjectsToMap
+     * @param {Array<MovableObject|DrawableObject>} objects - Array of objects to draw
+     */
     addObjectsToMap(objects) {
         objects.forEach(o => {
             this.addToMap(o);
         });
     }
 
+    /**
+     * Adds a single object to the game map
+     * Handles flipping images for objects facing different directions
+     * @method addToMap
+     * @param {MovableObject|DrawableObject} mo - Object to draw
+     */
     addToMap(mo) {
         if (mo.otherDirection) {
             this.flipImage(mo);
@@ -270,6 +344,11 @@ class World {
         }
     }
 
+    /**
+     * Flips an image horizontally for objects facing left
+     * @method flipImage
+     * @param {MovableObject|DrawableObject} mo - Object to flip
+     */
     flipImage(mo) {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
@@ -277,16 +356,30 @@ class World {
         mo.x = mo.x * -1;
     }
 
+    /**
+     * Restores the canvas state after flipping an image
+     * @method flipImageBack
+     * @param {MovableObject|DrawableObject} mo - Object to restore
+     */
     flipImageBack(mo) {
         mo.x = mo.x * -1;
         this.ctx.restore();
     }
 
- 
+    /**
+     * Toggles game sound on/off
+     * @method toggleSound
+     * @param {boolean} muted - True to mute sounds, false to enable
+     */
     toggleSound(muted) {
         window.audioManager.setMute(muted);
     }
 
+    /**
+     * Shows the victory screen when player wins
+     * Stops the game and plays win sound
+     * @method showWonScreen
+     */
     showWonScreen() {
         document.getElementById('game-won').style.display = 'flex';
         window.audioManager.stop('background');
@@ -295,6 +388,11 @@ class World {
         showGameWon();
     }
     
+    /**
+     * Shows the game over screen when player loses
+     * Stops the game and plays lose sound
+     * @method showLostScreen
+     */
     showLostScreen() {
         document.getElementById('game-over').style.display = 'flex';
         window.audioManager.stop('background');
@@ -303,11 +401,19 @@ class World {
         showGameOver();
     }
     
-
+    /**
+     * Shows the restart button
+     * @method showRestartButton
+     */
     showRestartButton() {
         document.getElementById('restartButton').classList.remove('d-none');
     }
 
+    /**
+     * Stops all game processes
+     * Clears intervals and stops sounds
+     * @method stopGame
+     */
     stopGame() {
         window.audioManager.stopAll();
         this.gameIntervals.forEach(interval => clearInterval(interval));
@@ -321,15 +427,16 @@ class World {
         });
     }
 
-
-
+    /**
+     * Resets the game state to initial values
+     * Prepares for a new game
+     * @method reset
+     */
     reset() {
-        
         if (this.character) {
             this.character.reset();
         }
     
-        
         this.level.enemies.forEach(enemy => {
             if (enemy instanceof Endboss) {
                 enemy.isDead = false;
@@ -338,15 +445,12 @@ class World {
             }
         });
     
-        
         this.statusBar.setPercentage(100);
         this.bottleBar.setBottles(0);
         this.coinBar.setCoins(0);
         this.endbossBar.setPercentage(100);
     
-        
         this.throwableObjects = [];
-        
         
         this.camera_x = 0;
     
