@@ -1,18 +1,40 @@
 /**
- * Final boss enemy with special behaviors
+ * @file endboss.class.js
+ * @description Implementation of the final boss enemy in El Pollo Loco game
+ */
+
+/**
+ * Endboss class that extends MovableObject
+ * This class represents the final boss chicken enemy with special attack patterns and behaviors
  * @class Endboss
  * @extends MovableObject
  */
 class Endboss extends MovableObject {
-    
+    /** Height of the boss in pixels @type {number} */
     height = 400;
+    
+    /** Width of the boss in pixels @type {number} */
     width = 250;
+    
+    /** Vertical position of the boss @type {number} */
     y = 55;
+    
+    /** Initial energy/health value @type {number} */
     energy = 100;
+    
+    /** Movement speed @type {number} */
     speed = 5;
-    isDead = false;  
+    
+    /** Flag indicating if boss is dead @type {boolean} */
+    isDead = false;
+    
+    /** Flag indicating if death animation has been played @type {boolean} */
     isDeadAnimationPlayed = false;
 
+    /**
+     * Image paths for walking animation
+     * @type {Array<string>}
+     */
     IMAGES_WALKING = [  
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G1.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G2.png',
@@ -20,6 +42,10 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/1_walk/G4.png'
     ];
 
+    /**
+     * Image paths for attack animation
+     * @type {Array<string>}
+     */
     IMAGES_ATTACKING = [
         'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G13.png', 
         'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G14.png',
@@ -31,19 +57,28 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/3_attack/G20.png' 
     ];
 
+    /**
+     * Image paths for hurt animation
+     * @type {Array<string>}
+     */
     IMAGES_HURT = [
         'img_pollo_locco/img/4_enemie_boss_chicken/4_hurt/G21.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/4_hurt/G22.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/4_hurt/G23.png'
     ];
 
+    /**
+     * Image paths for death animation
+     * @type {Array<string>}
+     */
     IMAGES_DEAD = [
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G24.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G25.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
     /**
-     * Creates a new boss instance
+     * Constructor for Endboss class
+     * Initializes position, dimensions, appearance, and behavior
      * @constructor
      */
     constructor() {
@@ -69,18 +104,30 @@ class Endboss extends MovableObject {
 
     }
 
+    /** Flag indicating if boss is currently attacking @type {boolean} */
     isAttacking = false;
 
+    /**
+     * Initializes the boss behaviors and animations
+     * @method initializeEndboss
+     */
     initializeEndboss() {
         this.animate();
     }
 
+    /**
+     * Checks if the player character is within detection range
+     * @method isCharacterNear
+     * @returns {boolean} True if character is within the boss's detection range
+     */
     isCharacterNear() {
         if (!this.world || !this.world.character) return false;
         return Math.abs(this.world.character.x - this.x) < 500;
     }
     /**
      * Starts the boss attack sequence
+     * Triggers attack animation and sound effect
+     * @method startAttacking
      */
     startAttacking() {
         if (!this.isAttacking) {
@@ -93,6 +140,8 @@ class Endboss extends MovableObject {
     }
     /**
      * Handles damage taken by the boss
+     * Manages energy reduction, death animation, and game completion
+     * @method hit
      */
     hit() {
         if (this.isDead) return;
@@ -122,7 +171,11 @@ class Endboss extends MovableObject {
         }
     }
 
-
+    /**
+     * Controls animation and movement behavior of the boss
+     * Handles different states including hurt, attacking, and walking
+     * @method animate
+     */
     animate() {
         setInterval(() => {
             if (this.isDead) return;  
