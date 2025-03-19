@@ -1,7 +1,36 @@
+/**
+ * @file game.js
+ * @description Main game controller script for El Pollo Loco game
+ */
+
+/**
+ * Canvas element for rendering the game
+ * @type {HTMLCanvasElement}
+ */
 let canvas;
+
+/**
+ * Main game world instance
+ * @type {World}
+ */
 let world;
+
+/**
+ * Keyboard input handler instance
+ * @type {Keyboard}
+ */
 let keyboard = new Keyboard();
+
+/**
+ * Background music audio element
+ * @type {HTMLAudioElement}
+ */
 let backgroundMusic;
+
+/**
+ * Array to store all interval IDs for proper cleanup
+ * @type {Array<number>}
+ */
 let intervalIds = [];
 
 /**
@@ -56,6 +85,10 @@ function init() {
     }
 }
 
+/**
+ * Shows the start screen and initializes the start button
+ * @function showStartScreen
+ */
 function showStartScreen() {
     const startScreen = document.getElementById('start-screen');
     const startButton = document.getElementById('start-button'); 
@@ -75,6 +108,10 @@ function showStartScreen() {
     }
 }
 
+/**
+ * Hides all overlay screens (start, game over, game won)
+ * @function hideAllOverlayScreens
+ */
 function hideAllOverlayScreens() {
     const overlays = [
         'start-screen',
@@ -90,6 +127,10 @@ function hideAllOverlayScreens() {
     });
 }
 
+/**
+ * Restarts the game by clearing intervals, hiding overlays, and resetting the world
+ * @function restartGame
+ */
 function restartGame() {
     clearAllIntervals();
     
@@ -115,6 +156,7 @@ function restartGame() {
 
     updateMuteIcon();
 }
+
 /**
  * Clears all active intervals in the window
  * @function clearAllIntervals
@@ -125,6 +167,7 @@ function clearAllIntervals() {
         window.clearInterval(i);
     }
 }
+
 /**
  * Detects device orientation and shows hint if needed
  * @function checkOrientation
@@ -149,7 +192,6 @@ function checkOrientation() {
  * Sets up mobile touch controls for the game
  * @function initMobileControls
  */
-
 function initMobileControls() {
     if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
         const mobileControls = document.getElementById('mobile-controls');
@@ -214,26 +256,43 @@ function initMobileControls() {
     }
 }
 
+/**
+ * Initializes mobile controls when DOM is loaded
+ * @event DOMContentLoaded
+ */
 document.addEventListener('DOMContentLoaded', () => {
     initMobileControls();
 });
 
-
+/**
+ * Shows the game over screen
+ * @function showGameOver
+ */
 function showGameOver() {
     document.getElementById('game-over').classList.remove('d-none');
 }
 
+/**
+ * Shows the game won screen
+ * @function showGameWon
+ */
 function showGameWon() {
     document.getElementById('game-won').classList.remove('d-none');
 }
 
-
+/**
+ * Stops all sound effects and music
+ * @function stopAllSounds
+ */
 function stopAllSounds() {
     backgroundMusic.pause();
     backgroundMusic.currentTime = 0;
 }
 
-
+/**
+ * Flag indicating if the game is muted
+ * @type {boolean}
+ */
 let isMuted = false;
 
 /**
@@ -250,7 +309,10 @@ function toggleMute() {
     window.audioManager.setMute(isMuted);
 }
 
-
+/**
+ * Updates the mute icon based on the current mute state
+ * @function updateMuteIcon
+ */
 function updateMuteIcon() {
     let muteIcon = document.getElementById('mute');
     if (muteIcon) {
@@ -260,15 +322,26 @@ function updateMuteIcon() {
     }
 }
 
+/**
+ * Shows the impressum (imprint) screen
+ * @function showImpressum
+ */
 function showImpressum() {
     document.getElementById('impressum').classList.remove('d-none');
 }
 
+/**
+ * Closes the impressum screen
+ * @function closeImpressum
+ */
 function closeImpressum() {
     document.getElementById('impressum').classList.add('d-none');
 }
 
-
+/**
+ * Toggles fullscreen mode for the canvas element
+ * @function fullscreen
+ */
 function fullscreen() {
     let fullscreenElement = document.getElementById('canvas');
     if (fullscreenElement.requestFullscreen) {
@@ -278,7 +351,11 @@ function fullscreen() {
     }
 }
 
-
+/**
+ * Handles keyboard key down events for game controls
+ * @event keydown
+ * @param {KeyboardEvent} e - The keyboard event
+ */
 window.addEventListener('keydown', (e) => {
     if (e.keyCode == 39) {
         keyboard.RIGHT = true;
@@ -300,6 +377,11 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
+/**
+ * Handles keyboard key up events for game controls
+ * @event keyup
+ * @param {KeyboardEvent} e - The keyboard event
+ */
 window.addEventListener('keyup', (e) => {
     if (e.keyCode == 39) {
         keyboard.RIGHT = false;
@@ -321,16 +403,24 @@ window.addEventListener('keyup', (e) => {
     }
 });
 
-
+/**
+ * Handles window resize events to check orientation
+ * @event resize
+ */
 window.addEventListener('resize', checkOrientation);
+
+/**
+ * Handles orientation change events on mobile devices
+ * @event orientationchange
+ */
 window.addEventListener('orientationchange', checkOrientation);
+
 /**
  * Creates a stoppable interval that can be tracked for cleanup
  * @function setStopableInterval
  * @param {Function} fn - Function to execute
  * @param {number} time - Interval time in milliseconds
  */
-
 function setStopableInterval(fn, time) {
     let id = setInterval(fn, time);
     intervalIds.push(id);

@@ -60,5 +60,5 @@ class Chick extends MovableObject {
         this.loadImage(this.IMAGES_DEAD[0]); 
         window.audioManager.play('chickenDie');
         this.speed = 0;
-    }
+    }    
 }

@@ -193,7 +193,7 @@ class Character extends MovableObject {
                     if (this.world) {
                          
                         this.world.level.enemies.forEach((enemy) => {
-                           if (enemy instanceof Endboss) {
+                           if (enemy instanceof Endboss && typeof enemy.stopSounds === 'function') {
                             enemy.stopSounds();
                            }
                         });
