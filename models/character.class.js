@@ -1,11 +1,34 @@
+/**
+ * @file character.class.js
+ * @description Implementation of the playable character in El Pollo Loco game
+ */
+
+/**
+ * Character class that extends MovableObject
+ * This class represents the main playable character (Pepe) with all its animations and behaviors
+ * @class Character
+ * @extends MovableObject
+ */
 class Character extends MovableObject {
+    /** Height of the character in pixels @type {number} */
     height = 280;
+    
+    /** Initial vertical position @type {number} */
     y = 80;
+    
+    /** Movement speed @type {number} */
     speed = 10;
+    
+    /** Number of collected bottles @type {number} */
     bottles = 0;
+    
+    /** Number of collected coins @type {number} */
     coins = 0;
 
-
+    /**
+     * Image paths for walking animation
+     * @type {Array<string>}
+     */
     IMAGES_WALKING = [
         'img_pollo_locco/img/2_character_pepe/2_walk/W-21.png',
         'img_pollo_locco/img/2_character_pepe/2_walk/W-22.png',
@@ -15,6 +38,10 @@ class Character extends MovableObject {
         'img_pollo_locco/img/2_character_pepe/2_walk/W-26.png' 
     ];
 
+    /**
+     * Image paths for jumping animation
+     * @type {Array<string>}
+     */
     IMAGES_JUMPING = [
         'img_pollo_locco/img/2_character_pepe/3_jump/J-31.png',  
         'img_pollo_locco/img/2_character_pepe/3_jump/J-32.png',
@@ -27,6 +54,10 @@ class Character extends MovableObject {
         'img_pollo_locco/img/2_character_pepe/3_jump/J-39.png'
     ]; 
 
+    /**
+     * Image paths for death animation
+     * @type {Array<string>}
+     */
     IMAGES_DEAD = [
         'img_pollo_locco/img/2_character_pepe/5_dead/D-51.png',
         'img_pollo_locco/img/2_character_pepe/5_dead/D-52.png',
@@ -37,12 +68,20 @@ class Character extends MovableObject {
         'img_pollo_locco/img/2_character_pepe/5_dead/D-57.png'
     ];
 
+    /**
+     * Image paths for hurt animation
+     * @type {Array<string>}
+     */
     IMAGES_HURT = [
         'img_pollo_locco/img/2_character_pepe/4_hurt/H-41.png',        
         'img_pollo_locco/img/2_character_pepe/4_hurt/H-42.png',
         'img_pollo_locco/img/2_character_pepe/4_hurt/H-43.png'
     ];
 
+    /**
+     * Image paths for idle animation
+     * @type {Array<string>}
+     */
     IMAGES_IDLE = [
         "img_pollo_locco/img/2_character_pepe/1_idle/idle/I-1.png",
         "img_pollo_locco/img/2_character_pepe/1_idle/idle/I-2.png",
@@ -56,6 +95,10 @@ class Character extends MovableObject {
         "img_pollo_locco/img/2_character_pepe/1_idle/idle/I-10.png",
     ];
 
+    /**
+     * Image paths for long idle animation
+     * @type {Array<string>}
+     */
     IMAGES_LONGIDLE = [
         "img_pollo_locco/img/2_character_pepe/1_idle/long_idle/I-11.png",
         "img_pollo_locco/img/2_character_pepe/1_idle/long_idle/I-12.png",
@@ -69,13 +112,28 @@ class Character extends MovableObject {
         "img_pollo_locco/img/2_character_pepe/1_idle/long_idle/I-20.png",
     ];
 
+    /** Reference to the game world @type {World} */
     world;
+    
+    /** Reference to keyboard input handler @type {Keyboard} */
     keyboard;
+    
+    /** Timestamp when idle started @type {number} */
     lastIdleStart;
+    
+    /** Flag indicating if death animation has played @type {boolean} */
     deathAnimationPlayed = false;
+    
+    /** Flag indicating if character is jumping @type {boolean} */
     isJumping = false;
+    
+    /** Flag indicating if character is moving @type {boolean} */
     isMoving = false;
+    
+    /** Flag indicating if character is throwing a bottle @type {boolean} */
     isThrowingBottle = false;
+    
+    /** Timestamp of last bottle throw @type {number} */
     lastBottleThrow = 0;
     
     /**
@@ -104,16 +162,25 @@ class Character extends MovableObject {
         this.applyGravity();
     }
 
+    /**
+     * Moves the character to the right
+     */
     moveRight() {
         this.x += this.speed;
         this.isMoving = true;
     }
 
+    /**
+     * Moves the character to the left
+     */
     moveLeft() {
         this.x -= this.speed;
         this.isMoving = true;
     }
 
+    /**
+     * Makes the character jump if on the ground
+     */
     jump() {
         if (!this.isAboveGround()) {
             this.speedY = 25; 
@@ -122,6 +189,9 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Applies gravity physics to the character
+     */
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
@@ -135,7 +205,6 @@ class Character extends MovableObject {
      * Handles damage taken by the character
      * @param {number} damage - Amount of damage to apply
      */
-
     hit(damage) {
         if (!this.isHurt()) {
             this.energy -= damage;
@@ -152,6 +221,10 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Checks if character is above ground level
+     * @returns {boolean} True if character is in the air
+     */
     isAboveGround() {
         if (this instanceof ThrowableObject) {
             return true;
@@ -160,16 +233,28 @@ class Character extends MovableObject {
         }
     }
     
+    /**
+     * Checks if character is currently in hurt state
+     * @returns {boolean} True if character was recently hit
+     */
     isHurt() {
         let timepassed = new Date().getTime() - this.lastHit;
         timepassed = timepassed / 1000;
         return timepassed < 1; 
     }
 
+    /**
+     * Checks if character is dead
+     * @returns {boolean} True if character has no energy left
+     */
     isDead() {
         return this.energy <= 0;
     }
     
+    /**
+     * Checks if character is currently throwing a bottle
+     * @returns {boolean} True if character recently threw a bottle
+     */
     isThrowing() {
         let timepassed = new Date().getTime() - this.lastBottleThrow;
         timepassed = timepassed / 1000;
@@ -204,11 +289,17 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Starts all character animations
+     */
     startAnimations() {
         this.animateMovement();
         this.animateImages();
     }
 
+    /**
+     * Controls character movement based on keyboard input
+     */
     animateMovement() {
         setInterval(() => {
             if (!this.isDead()) { 
@@ -256,6 +347,9 @@ class Character extends MovableObject {
         }, 1000 / 60);
     }
 
+    /**
+     * Handles character animation states
+     */
     animateImages() {
         let wasAboveGround = false;
         
