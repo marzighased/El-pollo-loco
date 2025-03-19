@@ -1,16 +1,42 @@
 /**
+ * @file drawable-object.class.js
+ * @description Base implementation for all drawable objects in El Pollo Loco game
+ */
+
+/**
  * Base class for all renderable objects in the game
  * @class DrawableObject
  */
 class DrawableObject {
+    /** Image object for rendering @type {HTMLImageElement} */
     img;
+    
+    /** Cache for storing loaded images @type {Object.<string, HTMLImageElement>} */
     imageCache = {};
+    
+    /** Current frame index for animations @type {number} */
     currentImage = 0;
+    
+    /** Horizontal position @type {number} */
     x = 120;
+    
+    /** Vertical position @type {number} */
     y = 290;
+    
+    /** Height in pixels @type {number} */
     height = 150;
+    
+    /** Width in pixels @type {number} */
     width = 100;
 
+    /**
+     * Collision detection offset values
+     * @type {Object}
+     * @property {number} x - Horizontal offset from left
+     * @property {number} y - Vertical offset from top
+     * @property {number} width - Width reduction for collision box
+     * @property {number} height - Height reduction for collision box
+     */
     offset = {
         x: 0,
         y: 0,
@@ -35,9 +61,11 @@ class DrawableObject {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
 
-
+    /**
+     * Draws a debug frame around the object
+     * @param {CanvasRenderingContext2D} ctx - The canvas rendering context
+     */
     drawFrame(ctx) {
-
         if (false) {
              ctx.beginPath();
              ctx.lineWidth = '5';
@@ -47,7 +75,10 @@ class DrawableObject {
         }
     }
 
-
+    /**
+     * Draws a debug frame showing collision detection area
+     * @param {CanvasRenderingContext2D} ctx - The canvas rendering context
+     */
     drawOffsetFrame(ctx) {
         if (false) {
             ctx.beginPath();
@@ -68,15 +99,11 @@ class DrawableObject {
      * @param {Array<string>} arr - Array of image paths
      */
     loadImages(arr) {
-
         arr.forEach((path) => {
-            
-        
-          let img = new Image();
-          img.src = path;
-          img.style = 'transform: scaleX(-1)';
-          this.imageCache[path] = img;
-
+            let img = new Image();
+            img.src = path;
+            img.style = 'transform: scaleX(-1)';
+            this.imageCache[path] = img;
         });
     }  
 }
