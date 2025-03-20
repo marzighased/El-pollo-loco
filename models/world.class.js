@@ -44,6 +44,8 @@ class World {
     
     /** Array of all interval IDs for proper cleanup @type {Array<number>} */
     gameIntervals = [];
+
+    lastBottleThrowTime = 0;
     
     /**
      * Creates a new game world instance
@@ -139,75 +141,127 @@ class World {
     checkCollisions() {
         const interval = setInterval(() => {
             if (!this.character) return; 
-    
+
             this.level.enemies.forEach((enemy) => {
                 if (this.character.isColliding(enemy) && !this.character.isDead()) {
-                    let characterBottom = this.character.y + this.character.height;
-                    let enemyTop = enemy.y;
-                    let characterTop = this.character.y;
-                    let characterCenter = this.character.x + this.character.width / 2;
-                    let enemyCenter = enemy.x + enemy.width / 2;
-                    
-                    if (this.character.speedY < 0 &&
-                        characterBottom >= enemyTop && 
-                        characterBottom <= enemyTop + 50 &&
-                        Math.abs(characterCenter - enemyCenter) < 50) { 
-                        
-                        if (enemy instanceof Chicken || enemy instanceof Chick) {
-                            enemy.hit();
-                            const index = this.level.enemies.indexOf(enemy);
-                            if (index > -1) {
-                                this.level.enemies.splice(index, 1);
-                            }
-                            
-                            this.character.speedY = 15;
-                            return;
-                        }
-                    } 
-                    
-                    else {
-                        if (!this.character.isHurt()) {
-                            if (enemy instanceof Chicken) {
-                                this.character.hit(10);
-                                this.statusBar.setPercentage(this.character.energy);
-                                
-                            } else if (enemy instanceof Chick) {
-                                this.character.hit(5);
-                                this.statusBar.setPercentage(this.character.energy);
-    
-                            } else if (enemy instanceof Endboss && enemy.isAttacking) {
-                                this.character.hit(25);
-                                this.statusBar.setPercentage(this.character.energy);
-                                
-                                if (characterCenter < enemyCenter) {
-                                    this.character.x -= 20;
-                                } else {
-                                    this.character.x += 20;
-                                }
-                            }
-    
-                            if (this.character.isDead()) {
-                                this.character.playDeathAnimation();
-                                setTimeout(() => {
-                                    this.stopGame();
-                                    document.getElementById('game-over').classList.remove('d-none');
-                                }, 1000);
-                            }
-                        }
-                    }
+                    this.handleCollisionWithEnemy(enemy);
                 }
             });
-    
-            if (this.character.x < -100) {
-                this.character.x = -100;
-            }
-            if (this.character.x > 2200) {
-                this.character.x = 2200;
-            }
-    
+
+            this.enforceWorldBoundaries();
         }, 50);
         
         this.gameIntervals.push(interval);
+    }
+
+    /**
+     * Handles collision between character and enemy
+     * @param {MovableObject} enemy - The enemy object colliding with character
+     */
+    handleCollisionWithEnemy(enemy) {
+        let characterBottom = this.character.y + this.character.height;
+        let enemyTop = enemy.y;
+        let characterTop = this.character.y;
+        let characterCenter = this.character.x + this.character.width / 2;
+        let enemyCenter = enemy.x + enemy.width / 2;
+        
+        // Check if character is jumping on enemy from above
+        if (this.isJumpingOnEnemy(characterBottom, enemyTop, characterCenter, enemyCenter)) {
+            this.handleJumpOnEnemy(enemy);
+            return;
+        } 
+        
+        // Otherwise handle taking damage from enemy
+        this.handleDamageFromEnemy(enemy, characterCenter, enemyCenter);
+    }
+
+    /**
+     * Determines if character is jumping on an enemy from above
+     * @param {number} characterBottom - Bottom position of character
+     * @param {number} enemyTop - Top position of enemy
+     * @param {number} characterCenter - Center x-position of character
+     * @param {number} enemyCenter - Center x-position of enemy
+     * @returns {boolean} True if character is jumping on enemy
+     */
+    isJumpingOnEnemy(characterBottom, enemyTop, characterCenter, enemyCenter) {
+        return this.character.speedY < 0 &&
+            characterBottom >= enemyTop && 
+            characterBottom <= enemyTop + 50 &&
+            Math.abs(characterCenter - enemyCenter) < 50;
+    }
+
+    /**
+     * Handles what happens when character jumps on an enemy
+     * @param {MovableObject} enemy - The enemy being jumped on
+     */
+    handleJumpOnEnemy(enemy) {
+        if (enemy instanceof Chicken || enemy instanceof Chick) {
+            enemy.hit();
+            const index = this.level.enemies.indexOf(enemy);
+            if (index > -1) {
+                this.level.enemies.splice(index, 1);
+            }
+            
+            // Bounce character after killing enemy
+            this.character.speedY = 15;
+        }
+    }
+
+    /**
+     * Handles damage taken by character from enemy collision
+     * @param {MovableObject} enemy - The enemy causing damage
+     * @param {number} characterCenter - Center x-position of character
+     * @param {number} enemyCenter - Center x-position of enemy
+     */
+    handleDamageFromEnemy(enemy, characterCenter, enemyCenter) {
+        if (!this.character.isHurt()) {
+            if (enemy instanceof Chicken) {
+                this.character.hit(10);
+                this.statusBar.setPercentage(this.character.energy);
+                
+            } else if (enemy instanceof Chick) {
+                this.character.hit(5);
+                this.statusBar.setPercentage(this.character.energy);
+
+            } else if (enemy instanceof Endboss && enemy.isAttacking) {
+                this.character.hit(25);
+                this.statusBar.setPercentage(this.character.energy);
+                
+                // Knockback effect
+                if (characterCenter < enemyCenter) {
+                    this.character.x -= 20;
+                } else {
+                    this.character.x += 20;
+                }
+            }
+
+            this.checkForCharacterDeath();
+        }
+    }
+
+    /**
+     * Checks if character is dead and handles death sequence
+     */
+    checkForCharacterDeath() {
+        if (this.character.isDead()) {
+            this.character.playDeathAnimation();
+            setTimeout(() => {
+                this.stopGame();
+                document.getElementById('game-over').classList.remove('d-none');
+            }, 1000);
+        }
+    }
+
+    /**
+     * Ensures character stays within world boundaries
+     */
+    enforceWorldBoundaries() {
+        if (this.character.x < -100) {
+            this.character.x = -100;
+        }
+        if (this.character.x > 2200) {
+            this.character.x = 2200;
+        }
     }
 
     /**
@@ -216,12 +270,20 @@ class World {
      * @method checkThrowObjects
      */
     checkThrowObjects() {
-        if (this.keyboard.D && this.character.bottles > 0) {
+        const currentTime = new Date().getTime();
+        const cooldownTime = 500; 
+        
+        if (this.keyboard.D && 
+            this.character.bottles > 0 && 
+            currentTime - this.lastBottleThrowTime >= cooldownTime) {
+            
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             bottle.world = this;
             this.throwableObjects.push(bottle);
             this.character.bottles--;
             this.bottleBar.setBottles(this.character.bottles);
+            
+            this.lastBottleThrowTime = currentTime;
         }
     }
 

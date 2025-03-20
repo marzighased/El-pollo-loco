@@ -299,52 +299,89 @@ class Character extends MovableObject {
 
     /**
      * Controls character movement based on keyboard input
+     * Main animation loop for character movement
      */
     animateMovement() {
         setInterval(() => {
             if (!this.isDead()) { 
-                this.isMoving = false; 
-                
-                if (this.world.keyboard.D && this.bottles > 0) {
-                    this.lastBottleThrow = new Date().getTime(); 
-                    this.lastIdleStart = new Date().getTime(); 
-                }
-                
-                if (this.world.keyboard.SPACE && !this.isAboveGround()) {
-                    this.jump();
-                    this.lastIdleStart = new Date().getTime(); 
-                }
-
-                if (this.world.keyboard.RIGHT && this.x < 2200) {
-                    this.moveRight();
-                    this.otherDirection = false;
-                    if (!this.isAboveGround()) {
-                        window.audioManager.play('walking');
-                    }
-                }
-                
-                if (this.world.keyboard.LEFT && this.x > -100) {
-                    this.moveLeft();
-                    this.otherDirection = true;
-                    if (!this.isAboveGround()) {
-                        window.audioManager.play('walking');
-                    }
-                }
-     
-                if (!this.isMoving && !this.isAboveGround() && !this.isJumping) {
-                    window.audioManager.stop('walking');
-
-                    if (this.lastActionWasMovingOrJumping) {
-                        this.lastIdleStart = new Date().getTime();
-                        this.lastActionWasMovingOrJumping = false;
-                    }
-                } else if (this.isMoving || this.isJumping) {
-                    this.lastActionWasMovingOrJumping = true;
-                }
-                
-                this.world.camera_x = -this.x + 100;
+                this.handleBottleThrow();
+                this.handleJump();
+                this.handleHorizontalMovement();
+                this.handleIdleState();
+                this.updateCameraPosition();
             }
         }, 1000 / 60);
+    }
+
+    /**
+     * Handles bottle throwing action
+     * Checks if bottle throw key is pressed and updates related timestamps
+     */
+    handleBottleThrow() {
+        if (this.world.keyboard.D && this.bottles > 0) {
+            this.lastBottleThrow = new Date().getTime(); 
+            this.lastIdleStart = new Date().getTime(); 
+        }
+    }
+
+    /**
+     * Handles character jump action
+     * Checks if jump key is pressed and the character is on the ground
+     */
+    handleJump() {
+        if (this.world.keyboard.SPACE && !this.isAboveGround()) {
+            this.jump();
+            this.lastIdleStart = new Date().getTime();
+        }
+    }
+
+    /**
+     * Handles horizontal (left/right) movement
+     * Manages movement direction, sound effects, and animation states
+     */
+    handleHorizontalMovement() {
+        this.isMoving = false;
+        
+        if (this.world.keyboard.RIGHT && this.x < 2200) {
+            this.moveRight();
+            this.otherDirection = false;
+            if (!this.isAboveGround()) {
+                window.audioManager.play('walking');
+            }
+        }
+        
+        if (this.world.keyboard.LEFT && this.x > -100) {
+            this.moveLeft();
+            this.otherDirection = true;
+            if (!this.isAboveGround()) {
+                window.audioManager.play('walking');
+            }
+        }
+    }
+
+    /**
+     * Handles character idle state
+     * Manages sound effects and time tracking for idle animations
+     */
+    handleIdleState() {
+        if (!this.isMoving && !this.isAboveGround() && !this.isJumping) {
+            window.audioManager.stop('walking');
+
+            if (this.lastActionWasMovingOrJumping) {
+                this.lastIdleStart = new Date().getTime();
+                this.lastActionWasMovingOrJumping = false;
+            }
+        } else if (this.isMoving || this.isJumping) {
+            this.lastActionWasMovingOrJumping = true;
+        }
+    }
+
+    /**
+     * Updates the camera position based on character position
+     * Centers the view on the character
+     */
+    updateCameraPosition() {
+        this.world.camera_x = -this.x + 100;
     }
 
     /**
@@ -359,43 +396,73 @@ class Character extends MovableObject {
                 return;
             } 
             
-            if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
+            if (this.selectAnimationBasedOnState(wasAboveGround)) {
                 return;
             }
             
-            if (this.isAboveGround()) {
-                wasAboveGround = true;
-                this.isJumping = true;
-                this.playAnimation(this.IMAGES_JUMPING);
-                return;
-            }
-            
-            if (wasAboveGround) {
+            // Update landing status
+            if (wasAboveGround && !this.isAboveGround()) {
                 wasAboveGround = false;
                 this.isJumping = false;
                 this.lastIdleStart = new Date().getTime(); 
             }
             
-            if (this.isMoving && !this.isAboveGround()) {
-                this.playAnimation(this.IMAGES_WALKING);
-                return;
+            // Set wasAboveGround flag if character is in the air
+            if (this.isAboveGround()) {
+                wasAboveGround = true;
             }
             
-            if (this.isThrowing()) {
-                this.playAnimation(this.IMAGES_IDLE); 
-                return;
-            }
-            
-            const currentTime = new Date().getTime();
-            const idleTime = (currentTime - this.lastIdleStart) / 1000;
-            
-            if (idleTime > 4 && !this.isAboveGround() && !this.isMoving && !this.isThrowing()) {
-                this.playAnimation(this.IMAGES_LONGIDLE);
-            } else {
-                this.playAnimation(this.IMAGES_IDLE);
-            }
+            this.playIdleAnimations();
         }, 150);
+    }
+
+    /**
+     * Selects and plays animation based on character's current state
+     * @param {boolean} wasAboveGround - Whether character was above ground in previous frame
+     * @returns {boolean} True if a specific animation was played, false if default idle should be used
+     */
+    selectAnimationBasedOnState(wasAboveGround) {
+        // Check for hurt state
+        if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+            return true;
+        }
+        
+        // Check for jumping state
+        if (this.isAboveGround()) {
+            this.isJumping = true;
+            this.playAnimation(this.IMAGES_JUMPING);
+            return true;
+        }
+        
+        // Check for walking state
+        if (this.isMoving && !this.isAboveGround()) {
+            this.playAnimation(this.IMAGES_WALKING);
+            return true;
+        }
+        
+        // Check for throwing state
+        if (this.isThrowing()) {
+            this.playAnimation(this.IMAGES_IDLE); 
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Plays idle animations based on how long the character has been idle
+     * Switches between regular idle and long idle animations
+     */
+    playIdleAnimations() {
+        const currentTime = new Date().getTime();
+        const idleTime = (currentTime - this.lastIdleStart) / 1000;
+        
+        if (idleTime > 4 && !this.isAboveGround() && !this.isMoving && !this.isThrowing()) {
+            this.playAnimation(this.IMAGES_LONGIDLE);
+        } else {
+            this.playAnimation(this.IMAGES_IDLE);
+        }
     }
 
     /**
