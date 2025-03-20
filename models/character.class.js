@@ -340,11 +340,15 @@ class Character extends MovableObject {
      * Manages movement direction, sound effects, and animation states
      */
     handleHorizontalMovement() {
+        let wasMovingBefore = this.isMoving;
         this.isMoving = false;
         
         if (this.world.keyboard.RIGHT && this.x < 2200) {
             this.moveRight();
             this.otherDirection = false;
+            if (!wasMovingBefore) {
+                this.lastIdleStart = new Date().getTime();
+            }
             if (!this.isAboveGround()) {
                 window.audioManager.play('walking');
             }
@@ -353,6 +357,9 @@ class Character extends MovableObject {
         if (this.world.keyboard.LEFT && this.x > -100) {
             this.moveLeft();
             this.otherDirection = true;
+            if (!wasMovingBefore) {
+                this.lastIdleStart = new Date().getTime();
+            }
             if (!this.isAboveGround()) {
                 window.audioManager.play('walking');
             }
@@ -373,7 +380,7 @@ class Character extends MovableObject {
             }
         } else if (this.isMoving || this.isJumping) {
             this.lastActionWasMovingOrJumping = true;
-        }
+        }    
     }
 
     /**
@@ -416,12 +423,18 @@ class Character extends MovableObject {
         }, 150);
     }
 
-    /**
+     /**
      * Selects and plays animation based on character's current state
      * @param {boolean} wasAboveGround - Whether character was above ground in previous frame
      * @returns {boolean} True if a specific animation was played, false if default idle should be used
      */
     selectAnimationBasedOnState(wasAboveGround) {
+        // Check for walking state 
+        if (this.isMoving && !this.isAboveGround()) {
+            this.playAnimation(this.IMAGES_WALKING);
+            return true;
+        }
+        
         // Check for hurt state
         if (this.isHurt()) {
             this.playAnimation(this.IMAGES_HURT);
@@ -432,12 +445,6 @@ class Character extends MovableObject {
         if (this.isAboveGround()) {
             this.isJumping = true;
             this.playAnimation(this.IMAGES_JUMPING);
-            return true;
-        }
-        
-        // Check for walking state
-        if (this.isMoving && !this.isAboveGround()) {
-            this.playAnimation(this.IMAGES_WALKING);
             return true;
         }
         

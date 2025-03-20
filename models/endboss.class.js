@@ -171,6 +171,7 @@ class Endboss extends MovableObject {
         }
     }
 
+        
     /**
      * Controls animation and movement behavior of the boss
      * Handles different states including hurt, attacking, and walking
@@ -178,29 +179,49 @@ class Endboss extends MovableObject {
      */
     animate() {
         setInterval(() => {
-            if (this.isDead) return;  
-    
-            if (this.isHurt()) {
-                this.playAnimation(this.IMAGES_HURT);
-            } else if (this.isAttacking) {
-                this.playAnimation(this.IMAGES_ATTACKING);
-                if (this.world && this.world.character) {
-                    if (this.world.character.x < this.x) {
-                        this.x -= this.speed;
-                        this.otherDirection = false;
-                    } else {
-                        this.x += this.speed;
-                        this.otherDirection = true;
-                    }
-                }
-            } else {
-                this.playAnimation(this.IMAGES_WALKING);
-            }
-    
-            if (!this.isAttacking && this.isCharacterNear()) {
-                this.startAttacking();
-            }
+            if (this.isDead) return;
+            
+            this.updateAnimationState();
+            this.checkForCharacterProximity();
         }, 200);
+    }
+
+    /**
+     * Updates animation based on current boss state
+     */
+    updateAnimationState() {
+        if (this.isHurt()) {
+            this.playAnimation(this.IMAGES_HURT);
+        } else if (this.isAttacking) {
+            this.playAnimation(this.IMAGES_ATTACKING);
+            this.moveTowardsCharacter();
+        } else {
+            this.playAnimation(this.IMAGES_WALKING);
+        }
+    }
+
+    /**
+     * Moves boss towards character when attacking
+     */
+    moveTowardsCharacter() {
+        if (this.world && this.world.character) {
+            if (this.world.character.x < this.x) {
+                this.x -= this.speed;
+                this.otherDirection = false;
+            } else {
+                this.x += this.speed;
+                this.otherDirection = true;
+            }
+        }
+    }
+
+    /**
+     * Checks if character is nearby and starts attacking if true
+     */
+    checkForCharacterProximity() {
+        if (!this.isAttacking && this.isCharacterNear()) {
+            this.startAttacking();
+        }
     }
 
 }
