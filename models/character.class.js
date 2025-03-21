@@ -1,14 +1,3 @@
-/**
- * @file character.class.js
- * @description Implementation of the playable character in El Pollo Loco game
- */
-
-/**
- * Character class that extends MovableObject
- * This class represents the main playable character (Pepe) with all its animations and behaviors
- * @class Character
- * @extends MovableObject
- */
 class Character extends MovableObject {
     /** Height of the character in pixels @type {number} */
     height = 280;
@@ -267,25 +256,38 @@ class Character extends MovableObject {
     playDeathAnimation() {
         if (!this.deathAnimationPlayed) {
             this.deathAnimationPlayed = true;
-            let currentFrame = 0;
-            
-            const deathInterval = setInterval(() => {
-                if (currentFrame < this.IMAGES_DEAD.length) {
-                    this.loadImage(this.IMAGES_DEAD[currentFrame]);
-                    currentFrame++;
-                } else {
-                    clearInterval(deathInterval);
-                    if (this.world) {
-                         
-                        this.world.level.enemies.forEach((enemy) => {
-                           if (enemy instanceof Endboss && typeof enemy.stopSounds === 'function') {
-                            enemy.stopSounds();
-                           }
-                        });
-                        this.world.showLostScreen();
-                    }
+            this.playDeathAnimationFrames();
+        }
+    }
+
+    /**
+     * Plays the death animation frames in sequence
+     */
+    playDeathAnimationFrames() {
+        let currentFrame = 0;
+        
+        const deathInterval = setInterval(() => {
+            if (currentFrame < this.IMAGES_DEAD.length) {
+                this.loadImage(this.IMAGES_DEAD[currentFrame]);
+                currentFrame++;
+            } else {
+                clearInterval(deathInterval);
+                this.handleDeathAnimationComplete();
+            }
+        }, 200);
+    }
+
+    /**
+     * Handles what happens after death animation completes
+     */
+    handleDeathAnimationComplete() {
+        if (this.world) {
+            this.world.level.enemies.forEach((enemy) => {
+                if (enemy instanceof Endboss && typeof enemy.stopSounds === 'function') {
+                    enemy.stopSounds();
                 }
-            }, 200);
+            });
+            this.world.showLostScreen();
         }
     }
 
@@ -343,26 +345,52 @@ class Character extends MovableObject {
         let wasMovingBefore = this.isMoving;
         this.isMoving = false;
         
+        this.handleMoveRight(wasMovingBefore);
+        this.handleMoveLeft(wasMovingBefore);
+    }
+
+    /**
+     * Handles movement to the right
+     * @param {boolean} wasMovingBefore - Whether character was moving before
+     */
+    handleMoveRight(wasMovingBefore) {
         if (this.world.keyboard.RIGHT && this.x < 2200) {
             this.moveRight();
             this.otherDirection = false;
-            if (!wasMovingBefore) {
-                this.lastIdleStart = new Date().getTime();
-            }
-            if (!this.isAboveGround()) {
-                window.audioManager.play('walking');
-            }
+            this.handleMovementStart(wasMovingBefore);
+            this.playMovementSound();
         }
-        
+    }
+
+    /**
+     * Handles movement to the left
+     * @param {boolean} wasMovingBefore - Whether character was moving before
+     */
+    handleMoveLeft(wasMovingBefore) {
         if (this.world.keyboard.LEFT && this.x > -100) {
             this.moveLeft();
             this.otherDirection = true;
-            if (!wasMovingBefore) {
-                this.lastIdleStart = new Date().getTime();
-            }
-            if (!this.isAboveGround()) {
-                window.audioManager.play('walking');
-            }
+            this.handleMovementStart(wasMovingBefore);
+            this.playMovementSound();
+        }
+    }
+
+    /**
+     * Handles movement start logic
+     * @param {boolean} wasMovingBefore - Whether character was moving before
+     */
+    handleMovementStart(wasMovingBefore) {
+        if (!wasMovingBefore) {
+            this.lastIdleStart = new Date().getTime();
+        }
+    }
+
+    /**
+     * Plays movement sound if on the ground
+     */
+    playMovementSound() {
+        if (!this.isAboveGround()) {
+            window.audioManager.play('walking');
         }
     }
 
@@ -408,52 +436,102 @@ class Character extends MovableObject {
             }
             
             // Update landing status
-            if (wasAboveGround && !this.isAboveGround()) {
-                wasAboveGround = false;
-                this.isJumping = false;
-                this.lastIdleStart = new Date().getTime(); 
-            }
-            
-            // Set wasAboveGround flag if character is in the air
-            if (this.isAboveGround()) {
-                wasAboveGround = true;
-            }
+            wasAboveGround = this.updateLandingStatus(wasAboveGround);
             
             this.playIdleAnimations();
         }, 150);
     }
 
-     /**
+    /**
+     * Updates character landing status 
+     * @param {boolean} wasAboveGround - Whether character was above ground in previous frame
+     * @returns {boolean} Updated wasAboveGround value
+     */
+    updateLandingStatus(wasAboveGround) {
+        if (wasAboveGround && !this.isAboveGround()) {
+            this.isJumping = false;
+            this.lastIdleStart = new Date().getTime(); 
+            return false;
+        }
+        
+        if (this.isAboveGround()) {
+            return true;
+        }
+        
+        return wasAboveGround;
+    }
+
+    /**
      * Selects and plays animation based on character's current state
      * @param {boolean} wasAboveGround - Whether character was above ground in previous frame
      * @returns {boolean} True if a specific animation was played, false if default idle should be used
      */
     selectAnimationBasedOnState(wasAboveGround) {
-        // Check for walking state 
+        if (this.checkWalkingAnimation()) {
+            return true;
+        }
+        
+        if (this.checkHurtAnimation()) {
+            return true;
+        }
+        
+        if (this.checkJumpingAnimation()) {
+            return true;
+        }
+        
+        if (this.checkThrowingAnimation()) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Checks and plays walking animation if needed
+     * @returns {boolean} True if walking animation was played
+     */
+    checkWalkingAnimation() {
         if (this.isMoving && !this.isAboveGround()) {
             this.playAnimation(this.IMAGES_WALKING);
             return true;
         }
-        
-        // Check for hurt state
+        return false;
+    }
+
+    /**
+     * Checks and plays hurt animation if needed
+     * @returns {boolean} True if hurt animation was played
+     */
+    checkHurtAnimation() {
         if (this.isHurt()) {
             this.playAnimation(this.IMAGES_HURT);
             return true;
         }
-        
-        // Check for jumping state
+        return false;
+    }
+
+    /**
+     * Checks and plays jumping animation if needed
+     * @returns {boolean} True if jumping animation was played
+     */
+    checkJumpingAnimation() {
         if (this.isAboveGround()) {
             this.isJumping = true;
             this.playAnimation(this.IMAGES_JUMPING);
             return true;
         }
-        
-        // Check for throwing state
+        return false;
+    }
+
+    /**
+     * Checks and plays throwing animation if needed
+     * @returns {boolean} True if throwing animation was played
+     */
+    checkThrowingAnimation() {
         if (this.isThrowing()) {
             this.playAnimation(this.IMAGES_IDLE); 
             return true;
         }
-        
         return false;
     }
 

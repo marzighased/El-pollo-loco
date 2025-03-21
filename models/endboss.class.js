@@ -76,6 +76,7 @@ class Endboss extends MovableObject {
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G25.png',
         'img_pollo_locco/img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
+
     /**
      * Constructor for Endboss class
      * Initializes position, dimensions, appearance, and behavior
@@ -124,6 +125,7 @@ class Endboss extends MovableObject {
         if (!this.world || !this.world.character) return false;
         return Math.abs(this.world.character.x - this.x) < 500;
     }
+
     /**
      * Starts the boss attack sequence
      * Triggers attack animation and sound effect
@@ -138,6 +140,7 @@ class Endboss extends MovableObject {
             }, 1000);
         }
     }
+
     /**
      * Handles damage taken by the boss
      * Manages energy reduction, death animation, and game completion
@@ -149,29 +152,55 @@ class Endboss extends MovableObject {
         this.energy -= 20;
         
         if (this.energy <= 0) {
-            this.energy = 0;
-            this.isDead = true;
-            window.audioManager.play('endbossDie');
-            let currentImageIndex = 0;
-            let deathInterval = setInterval(() => {
-                if (currentImageIndex < this.IMAGES_DEAD.length) {
-                    this.loadImage(this.IMAGES_DEAD[currentImageIndex]);
-                    currentImageIndex++;
-                } else {
-                    clearInterval(deathInterval);
-                    if (this.world) {
-                        setTimeout(() => {
-                            this.world.showWonScreen();
-                        }, 1000);
-                    }
-                }
-            }, 200);
+            this.handleDeath();
         } else {
             this.lastHit = new Date().getTime();
         }
     }
-
-        
+    
+    /**
+     * Handles the boss death sequence
+     * Sets up death state and plays death sound
+     * @method handleDeath
+     */
+    handleDeath() {
+        this.energy = 0;
+        this.isDead = true;
+        window.audioManager.play('endbossDie');
+        this.playDeathAnimation();
+    }
+    
+    /**
+     * Plays the boss death animation sequence
+     * Cycles through death images and triggers game won screen when complete
+     * @method playDeathAnimation
+     */
+    playDeathAnimation() {
+        let currentImageIndex = 0;
+        let deathInterval = setInterval(() => {
+            if (currentImageIndex < this.IMAGES_DEAD.length) {
+                this.loadImage(this.IMAGES_DEAD[currentImageIndex]);
+                currentImageIndex++;
+            } else {
+                clearInterval(deathInterval);
+                this.showGameWonScreen();
+            }
+        }, 200);
+    }
+    
+    /**
+     * Shows the game won screen after a delay
+     * Indicates successful completion of the game
+     * @method showGameWonScreen
+     */
+    showGameWonScreen() {
+        if (this.world) {
+            setTimeout(() => {
+                this.world.showWonScreen();
+            }, 1000);
+        }
+    }
+     
     /**
      * Controls animation and movement behavior of the boss
      * Handles different states including hurt, attacking, and walking

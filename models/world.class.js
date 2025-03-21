@@ -1,13 +1,3 @@
-/**
- * @file world.class.js
- * @description Main game world controller for El Pollo Loco game
- */
-
-/**
- * World class that manages all game objects and game logic
- * This class is responsible for rendering, collision detection, and game state management
- * @class World
- */
 class World {
     /** The main playable character @type {Character} */
     character = new Character();
@@ -112,25 +102,38 @@ class World {
         const interval = setInterval(() => {
             if (!this.character.isDead() && this.level.enemies.length < 15) {
                 if (Math.random() < 0.4) {
-                    let enemy;
-                    if (Math.random() < 0.5) {
-                        enemy = new Chicken();
-                    } else {
-                        enemy = new Chick();
-                    }
-                    
-                    const minDistance = 400;  
-                    const maxDistance = 800;  
-                    let spawnX = this.character.x + minDistance + Math.random() * (maxDistance - minDistance);
-                    spawnX = Math.min(spawnX, this.level.level_end_x - 500);
-                    
-                    enemy.x = spawnX;
-                    enemy.world = this;
-                    this.level.enemies.push(enemy);
+                    this.spawnRandomEnemy();
                 }
             }
         }, 1500);
         this.gameIntervals.push(interval);
+    }
+
+    /**
+     * Spawns a random enemy at a position ahead of the player
+     */
+    spawnRandomEnemy() {
+        let enemy;
+        if (Math.random() < 0.5) {
+            enemy = new Chicken();
+        } else {
+            enemy = new Chick();
+        }
+        
+        enemy.x = this.calculateEnemySpawnPosition();
+        enemy.world = this;
+        this.level.enemies.push(enemy);
+    }
+
+    /**
+     * Calculates spawn position for new enemies
+     * @returns {number} X position for enemy spawn
+     */
+    calculateEnemySpawnPosition() {
+        const minDistance = 400;  
+        const maxDistance = 800;  
+        let spawnX = this.character.x + minDistance + Math.random() * (maxDistance - minDistance);
+        return Math.min(spawnX, this.level.level_end_x - 500);
     }
 
     /**
@@ -142,16 +145,22 @@ class World {
         const interval = setInterval(() => {
             if (!this.character) return; 
 
-            this.level.enemies.forEach((enemy) => {
-                if (this.character.isColliding(enemy) && !this.character.isDead()) {
-                    this.handleCollisionWithEnemy(enemy);
-                }
-            });
-
+            this.checkEnemyCollisions();
             this.enforceWorldBoundaries();
         }, 50);
         
         this.gameIntervals.push(interval);
+    }
+
+    /**
+     * Checks for collisions with enemies
+     */
+    checkEnemyCollisions() {
+        this.level.enemies.forEach((enemy) => {
+            if (this.character.isColliding(enemy) && !this.character.isDead()) {
+                this.handleCollisionWithEnemy(enemy);
+            }
+        });
     }
 
     /**
@@ -161,7 +170,6 @@ class World {
     handleCollisionWithEnemy(enemy) {
         let characterBottom = this.character.y + this.character.height;
         let enemyTop = enemy.y;
-        let characterTop = this.character.y;
         let characterCenter = this.character.x + this.character.width / 2;
         let enemyCenter = enemy.x + enemy.width / 2;
         
@@ -215,27 +223,43 @@ class World {
      */
     handleDamageFromEnemy(enemy, characterCenter, enemyCenter) {
         if (!this.character.isHurt()) {
-            if (enemy instanceof Chicken) {
-                this.character.hit(10);
-                this.statusBar.setPercentage(this.character.energy);
-                
-            } else if (enemy instanceof Chick) {
-                this.character.hit(5);
-                this.statusBar.setPercentage(this.character.energy);
-
-            } else if (enemy instanceof Endboss && enemy.isAttacking) {
-                this.character.hit(25);
-                this.statusBar.setPercentage(this.character.energy);
-                
-                // Knockback effect
-                if (characterCenter < enemyCenter) {
-                    this.character.x -= 20;
-                } else {
-                    this.character.x += 20;
-                }
-            }
-
+            this.applyDamageBasedOnEnemyType(enemy, characterCenter, enemyCenter);
             this.checkForCharacterDeath();
+        }
+    }
+
+    /**
+     * Applies damage to character based on enemy type
+     * @param {MovableObject} enemy - The enemy causing damage
+     * @param {number} characterCenter - Center x-position of character
+     * @param {number} enemyCenter - Center x-position of enemy
+     */
+    applyDamageBasedOnEnemyType(enemy, characterCenter, enemyCenter) {
+        if (enemy instanceof Chicken) {
+            this.character.hit(10);
+            this.statusBar.setPercentage(this.character.energy);
+            
+        } else if (enemy instanceof Chick) {
+            this.character.hit(5);
+            this.statusBar.setPercentage(this.character.energy);
+
+        } else if (enemy instanceof Endboss && enemy.isAttacking) {
+            this.character.hit(25);
+            this.statusBar.setPercentage(this.character.energy);
+            this.applyKnockbackEffect(characterCenter, enemyCenter);
+        }
+    }
+
+    /**
+     * Applies knockback effect based on collision direction
+     * @param {number} characterCenter - Center x-position of character
+     * @param {number} enemyCenter - Center x-position of enemy
+     */
+    applyKnockbackEffect(characterCenter, enemyCenter) {
+        if (characterCenter < enemyCenter) {
+            this.character.x -= 20;
+        } else {
+            this.character.x += 20;
         }
     }
 
@@ -273,18 +297,33 @@ class World {
         const currentTime = new Date().getTime();
         const cooldownTime = 500; 
         
-        if (this.keyboard.D && 
-            this.character.bottles > 0 && 
-            currentTime - this.lastBottleThrowTime >= cooldownTime) {
-            
-            let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
-            bottle.world = this;
-            this.throwableObjects.push(bottle);
-            this.character.bottles--;
-            this.bottleBar.setBottles(this.character.bottles);
-            
+        if (this.canThrowBottle(currentTime, cooldownTime)) {
+            this.createAndThrowBottle();
             this.lastBottleThrowTime = currentTime;
         }
+    }
+
+    /**
+     * Checks if player can throw a bottle now
+     * @param {number} currentTime - Current timestamp
+     * @param {number} cooldownTime - Cooldown time between throws
+     * @returns {boolean} True if player can throw bottle
+     */
+    canThrowBottle(currentTime, cooldownTime) {
+        return this.keyboard.D && 
+            this.character.bottles > 0 && 
+            currentTime - this.lastBottleThrowTime >= cooldownTime;
+    }
+
+    /**
+     * Creates and throws a new bottle
+     */
+    createAndThrowBottle() {
+        let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+        bottle.world = this;
+        this.throwableObjects.push(bottle);
+        this.character.bottles--;
+        this.bottleBar.setBottles(this.character.bottles);
     }
 
     /**
@@ -295,11 +334,19 @@ class World {
     checkCollisionWithCoins() {
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
-                this.level.coins.splice(index, 1);
-                this.character.coins++;
-                this.coinBar.setCoins(this.character.coins);
+                this.collectCoin(index);
             }
         });
+    }
+
+    /**
+     * Handles coin collection
+     * @param {number} index - Index of the collected coin in array
+     */
+    collectCoin(index) {
+        this.level.coins.splice(index, 1);
+        this.character.coins++;
+        this.coinBar.setCoins(this.character.coins);
     }
 
     /**
@@ -310,11 +357,19 @@ class World {
     checkBottleCollisions() {
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle)) {
-                this.level.bottles.splice(index, 1);
-                this.character.bottles++;
-                this.bottleBar.setBottles(this.character.bottles);
+                this.collectBottle(index);
             }
         });
+    }
+
+    /**
+     * Handles bottle collection
+     * @param {number} index - Index of the collected bottle in array
+     */
+    collectBottle(index) {
+        this.level.bottles.splice(index, 1);
+        this.character.bottles++;
+        this.bottleBar.setBottles(this.character.bottles);
     }
 
     /**
@@ -323,26 +378,58 @@ class World {
      * @method checkBottleHitsEndboss
      */
     checkBottleHitsEndboss() {
-        this.throwableObjects.forEach((bottle, bottleIndex) => {
-            this.level.enemies.forEach((enemy) => {
-                if (enemy instanceof Endboss) {
-                    if (bottle.isColliding(enemy) && !bottle.isSplashed) {
-                        enemy.hit();
-                        bottle.splash();
-                        this.endbossBar.setPercentage(enemy.energy);
-                    }
-                } else if ((enemy instanceof Chicken || enemy instanceof Chick) && 
-                       bottle.isColliding(enemy) && !bottle.isSplashed) {
+        this.throwableObjects.forEach((bottle) => {
+            this.checkBottleHitsEnemies(bottle);
+            this.checkBottleHitsGround(bottle);
+        });
+    }
 
-                    enemy.hit();
-                    bottle.splash();
-                }
-            });
-
-            if (bottle.y >= 350 && !bottle.isSplashed) {
-                bottle.splash();
+    /**
+     * Checks if bottle hits any enemies
+     * @param {ThrowableObject} bottle - The thrown bottle
+     */
+    checkBottleHitsEnemies(bottle) {
+        this.level.enemies.forEach((enemy) => {
+            if (this.isBottleHittingEnemy(bottle, enemy)) {
+                this.handleBottleHitEnemy(bottle, enemy);
             }
         });
+    }
+
+    /**
+     * Checks if bottle collides with an enemy
+     * @param {ThrowableObject} bottle - The thrown bottle
+     * @param {MovableObject} enemy - The enemy to check collision with
+     * @returns {boolean} True if bottle is hitting enemy
+     */
+    isBottleHittingEnemy(bottle, enemy) {
+        return bottle.isColliding(enemy) && !bottle.isSplashed;
+    }
+
+    /**
+     * Handles what happens when bottle hits an enemy
+     * @param {ThrowableObject} bottle - The thrown bottle
+     * @param {MovableObject} enemy - The enemy hit by bottle
+     */
+    handleBottleHitEnemy(bottle, enemy) {
+        if (enemy instanceof Endboss) {
+            enemy.hit();
+            bottle.splash();
+            this.endbossBar.setPercentage(enemy.energy);
+        } else if (enemy instanceof Chicken || enemy instanceof Chick) {
+            enemy.hit();
+            bottle.splash();
+        }
+    }
+
+    /**
+     * Checks if bottle hits the ground
+     * @param {ThrowableObject} bottle - The thrown bottle
+     */
+    checkBottleHitsGround(bottle) {
+        if (bottle.y >= 350 && !bottle.isSplashed) {
+            bottle.splash();
+        }
     }
 
     /**
@@ -351,9 +438,25 @@ class World {
      * @method draw
      */
     draw() {
+        this.clearCanvas();
+        this.drawWorldObjects();
+        this.drawUIElements();
+        this.requestNextFrame();
+    }
+
+    /**
+     * Clears the canvas for new frame
+     */
+    clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
+    }
+
+    /**
+     * Draws all world objects with camera translation
+     */
+    drawWorldObjects() {
         this.ctx.translate(this.camera_x, 0);
+        
         this.addObjectsToMap(this.level.backgroundObjects);
         this.addObjectsToMap(this.level.clouds); 
         this.addObjectsToMap(this.level.bottles);
@@ -361,14 +464,24 @@ class World {
         this.addObjectsToMap(this.level.enemies);
         this.addObjectsToMap(this.level.coins);
         this.addObjectsToMap(this.throwableObjects);
+        
         this.ctx.translate(-this.camera_x, 0);
-    
+    }
+
+    /**
+     * Draws UI elements that stay fixed on screen
+     */
+    drawUIElements() {
         this.addToMap(this.statusBar);
         this.addToMap(this.bottleBar);
         this.addToMap(this.coinBar);
         this.addToMap(this.endbossBar);
-    
-        // Draw next frame
+    }
+
+    /**
+     * Requests next animation frame
+     */
+    requestNextFrame() {
         let self = this;
         requestAnimationFrame(() => {
             self.draw();
@@ -397,6 +510,7 @@ class World {
         if (mo.otherDirection) {
             this.flipImage(mo);
         }
+        
         mo.draw(this.ctx);
         mo.drawFrame(this.ctx);
         mo.drawOffsetFrame(this.ctx);
@@ -429,25 +543,30 @@ class World {
     }
 
     /**
-     * Toggles game sound on/off
-     * @method toggleSound
-     * @param {boolean} muted - True to mute sounds, false to enable
-     */
-    toggleSound(muted) {
-        window.audioManager.setMute(muted);
-    }
-
-    /**
      * Shows the victory screen when player wins
      * Stops the game and plays win sound
      * @method showWonScreen
      */
     showWonScreen() {
-        document.getElementById('game-won').style.display = 'flex';
-        window.audioManager.stop('background');
-        window.audioManager.play('gameWin');
+        this.displayGameWonUI();
+        this.playGameWonSound();
         this.stopGame();
         showGameWon();
+    }
+
+    /**
+     * Displays the game won UI elements
+     */
+    displayGameWonUI() {
+        document.getElementById('game-won').style.display = 'flex';
+    }
+
+    /**
+     * Plays game won sound effects
+     */
+    playGameWonSound() {
+        window.audioManager.stop('background');
+        window.audioManager.play('gameWin');
     }
     
     /**
@@ -456,11 +575,34 @@ class World {
      * @method showLostScreen
      */
     showLostScreen() {
-        document.getElementById('game-over').style.display = 'flex';
-        window.audioManager.stop('background');
-        window.audioManager.play('gameOver');
+        this.displayGameOverUI();
+        this.playGameOverSound();
         this.stopGame();
         showGameOver();
+    }
+
+    /**
+     * Displays the game over UI elements
+     */
+    displayGameOverUI() {
+        document.getElementById('game-over').style.display = 'flex';
+    }
+
+    /**
+     * Plays game over sound effects
+     */
+    playGameOverSound() {
+        window.audioManager.stop('background');
+        window.audioManager.play('gameOver');
+    }
+
+    /**
+     * Toggles game sound on/off
+     * @method toggleSound
+     * @param {boolean} muted - True to mute sounds, false to enable
+     */
+    toggleSound(muted) {
+        window.audioManager.setMute(muted);
     }
     
     /**
@@ -478,9 +620,22 @@ class World {
      */
     stopGame() {
         window.audioManager.stopAll();
+        this.clearAllGameIntervals();
+        this.stopAllEnemies();
+    }
+
+    /**
+     * Clears all game intervals
+     */
+    clearAllGameIntervals() {
         this.gameIntervals.forEach(interval => clearInterval(interval));
         this.gameIntervals = [];
+    }
 
+    /**
+     * Stops all enemies' behaviors
+     */
+    stopAllEnemies() {
         this.level.enemies.forEach((enemy) => {
             if (enemy instanceof Endboss) {
                 enemy.isDead = true; 
@@ -495,10 +650,27 @@ class World {
      * @method reset
      */
     reset() {
+        this.resetCharacter();
+        this.resetEnemies();
+        this.resetUI();
+        this.resetGameObjects();
+        this.resetCamera();
+        window.audioManager.stopAll();
+    }
+
+    /**
+     * Resets the character to initial state
+     */
+    resetCharacter() {
         if (this.character) {
             this.character.reset();
         }
-    
+    }
+
+    /**
+     * Resets enemies to initial state
+     */
+    resetEnemies() {
         this.level.enemies.forEach(enemy => {
             if (enemy instanceof Endboss) {
                 enemy.isDead = false;
@@ -506,16 +678,29 @@ class World {
                 enemy.energy = 100;
             }
         });
-    
+    }
+
+    /**
+     * Resets UI elements to initial state
+     */
+    resetUI() {
         this.statusBar.setPercentage(100);
         this.bottleBar.setBottles(0);
         this.coinBar.setCoins(0);
         this.endbossBar.setPercentage(100);
-    
+    }
+
+    /**
+     * Resets game objects to initial state
+     */
+    resetGameObjects() {
         this.throwableObjects = [];
-        
+    }
+
+    /**
+     * Resets camera position
+     */
+    resetCamera() {
         this.camera_x = 0;
-    
-        window.audioManager.stopAll();
     }
 }

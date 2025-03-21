@@ -34,35 +34,58 @@ let backgroundMusic;
 let intervalIds = [];
 
 /**
- * Restarts the game by clearing all intervals, removing overlays, and resetting the world
+ * Restarts the game by clearing all intervals, hiding overlays, and resetting the world
  * @function restartGame
  */
 window.restartGame = function() {
     clearAllIntervals();
-    
+    hideGameOverScreens();
+    resetGameWorld();
+    clearCanvas();
+    showStartUI();
+    initLevel();
+    showStartScreen();
+    updateMuteIcon();
+}
+
+/**
+ * Hides game over and game won screens
+ */
+function hideGameOverScreens() {
     document.getElementById('game-over').classList.add('d-none');
     document.getElementById('game-won').classList.add('d-none');
+}
 
+/**
+ * Resets the game world and stops all audio
+ */
+function resetGameWorld() {
     if (world) {
         window.audioManager.stopAll();
         world.stopGame();  
         world.reset();
         world = null;  
     }
+}
 
-    const canvas = document.getElementById('canvas'); 
+/**
+ * Clears the canvas display
+ */
+function clearCanvas() {
+    const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
+/**
+ * Shows the start UI elements
+ */
+function showStartUI() {
     document.getElementById('start-screen').classList.remove('d-none');
     document.querySelector('.controls-container').style.display = 'flex';
-    document.getElementById('start-button').style.display = 'block';  
-
-    initLevel();
-    showStartScreen();
-
-    updateMuteIcon();
+    document.getElementById('start-button').style.display = 'block';
 }
+
 
 /**
  * Initializes the game by setting up canvas and binding event handlers
@@ -73,7 +96,13 @@ function init() {
     checkOrientation();
     showStartScreen();
     initMobileControls();
-    
+    setupStartButton();
+}
+
+/**
+ * Sets up the start button event handler
+ */
+function setupStartButton() {
     const startButton = document.getElementById('start-button'); 
     if (startButton) {
         startButton.onclick = function() {
@@ -85,6 +114,7 @@ function init() {
     }
 }
 
+
 /**
  * Shows the start screen and initializes the start button
  * @function showStartScreen
@@ -94,18 +124,34 @@ function showStartScreen() {
     const startButton = document.getElementById('start-button'); 
     
     if (startButton) {
-        startScreen.style.display = 'flex'; 
-        document.querySelector('.controls-container').style.display = 'flex';
-        startButton.style.display = 'block';
-        
-        startButton.onclick = function() {
-            startScreen.style.display = 'none';
-            document.querySelector('.controls-container').style.display = 'none';
-            initLevel();
-            world = new World(canvas, keyboard);
-            world.toggleSound(isMuted);
-        };
+        showStartElements(startScreen);
+        setupStartButtonAction(startButton, startScreen);
     }
+}
+
+/**
+ * Shows the start screen elements
+ * @param {HTMLElement} startScreen - The start screen element
+ */
+function showStartElements(startScreen) {
+    startScreen.style.display = 'flex'; 
+    document.querySelector('.controls-container').style.display = 'flex';
+    document.getElementById('start-button').style.display = 'block';
+}
+
+/**
+ * Sets up the start button click action
+ * @param {HTMLElement} startButton - The start button element
+ * @param {HTMLElement} startScreen - The start screen element
+ */
+function setupStartButtonAction(startButton, startScreen) {
+    startButton.onclick = function() {
+        startScreen.style.display = 'none';
+        document.querySelector('.controls-container').style.display = 'none';
+        initLevel();
+        world = new World(canvas, keyboard);
+        world.toggleSound(isMuted);
+    };
 }
 
 /**
@@ -127,34 +173,57 @@ function hideAllOverlayScreens() {
     });
 }
 
+
 /**
  * Restarts the game by clearing intervals, hiding overlays, and resetting the world
  * @function restartGame
  */
 function restartGame() {
     clearAllIntervals();
-    
+    hideGameOverScreens();
+    resetGameWorld();
+    showStartScreen();
+    updateMuteIcon();
+}
+
+/**
+ * Hides game over and game won screens
+ */
+function hideGameOverScreens() {
     document.getElementById('game-over').classList.add('d-none');
     document.getElementById('game-won').classList.add('d-none');
+}
 
+/**
+ * Resets the game world and clears the canvas
+ */
+function resetGameWorld() {
     if (world) {
         window.audioManager.stopAll();  
         world.stopGame();  
         world.reset();
         world = null;  
     }
+    clearCanvas();
+    showStartUI();
+}
+
+/**
+ * Clears the canvas display
+ */
+function clearCanvas() {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
 
+/**
+ * Shows the start UI elements
+ */
+function showStartUI() {
     document.getElementById('start-screen').classList.remove('d-none');
     document.querySelector('.controls-container').style.display = 'flex';
     document.getElementById('start-button').style.display = 'block';
-
-    initLevel();
-    showStartScreen();
-
-    updateMuteIcon();
 }
 
 /**
@@ -193,68 +262,104 @@ function checkOrientation() {
  * @function initMobileControls
  */
 function initMobileControls() {
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-        const mobileControls = document.getElementById('mobile-controls');
-        if (mobileControls) {
-            mobileControls.style.display = 'flex';
-        }
+    if (!isTouchDevice()) {
+        return;
+    }
+    
+    showMobileControls();
+    setupMobileButtons();
+    preventDefaultTouchBehavior();
+}
 
-        const buttonLeft = document.getElementById('button-left');
-        const buttonRight = document.getElementById('button-right');
-        const buttonJump = document.getElementById('button-jump');
-        const buttonThrow = document.getElementById('button-throw');
+/**
+ * Checks if the device supports touch events
+ * @returns {boolean} True if the device supports touch
+ */
+function isTouchDevice() {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+}
 
-        buttonLeft.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            keyboard.LEFT = true;
-        }, { passive: false });
-
-        buttonLeft.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keyboard.LEFT = false;
-        }, { passive: false });
-
-        buttonRight.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            keyboard.RIGHT = true;
-        }, { passive: false });
-
-        buttonRight.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keyboard.RIGHT = false;
-        }, { passive: false });
-
-        buttonJump.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            keyboard.SPACE = true;
-        }, { passive: false });
-
-        buttonJump.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keyboard.SPACE = false;
-        }, { passive: false });
-
-        buttonThrow.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            keyboard.D = true;
-        }, { passive: false });
-
-        buttonThrow.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keyboard.D = false;
-        }, { passive: false });
-
-        document.querySelectorAll('.control-button').forEach(button => {
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-            }, { passive: false });
-            
-            button.addEventListener('touchend', (e) => {
-                e.preventDefault();
-            }, { passive: false });
-        });
+/**
+ * Shows the mobile controls UI element
+ */
+function showMobileControls() {
+    const mobileControls = document.getElementById('mobile-controls');
+    if (mobileControls) {
+        mobileControls.style.display = 'flex';
     }
 }
+
+/**
+ * Sets up event handlers for mobile control buttons
+ */
+function setupMobileButtons() {
+    setupDirectionButtons();
+    setupActionButtons();
+}
+
+/**
+ * Sets up left and right direction buttons
+ */
+function setupDirectionButtons() {
+    const buttonLeft = document.getElementById('button-left');
+    const buttonRight = document.getElementById('button-right');
+
+    buttonLeft.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.LEFT = true;}, { passive: false });
+
+    buttonLeft.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.LEFT = false;}, { passive: false });
+
+    buttonRight.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.RIGHT = true;}, { passive: false });
+
+    buttonRight.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.RIGHT = false;}, { passive: false });
+}
+
+/**
+ * Sets up jump and throw action buttons
+ */
+function setupActionButtons() {
+    const buttonJump = document.getElementById('button-jump');
+    const buttonThrow = document.getElementById('button-throw');
+
+    buttonJump.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.SPACE = true;}, { passive: false });
+
+    buttonJump.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.SPACE = false;}, { passive: false });
+
+    buttonThrow.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keyboard.D = true;}, { passive: false });
+
+    buttonThrow.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keyboard.D = false;}, { passive: false });
+}
+
+/**
+ * Prevents default touch behavior for all control buttons
+ */
+function preventDefaultTouchBehavior() {
+    document.querySelectorAll('.control-button').forEach(button => {
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+        
+        button.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+    });
+}
+
 
 /**
  * Initializes mobile controls when DOM is loaded
